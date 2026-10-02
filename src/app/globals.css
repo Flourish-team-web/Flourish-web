@@ -1,0 +1,215 @@
+@import "tailwindcss";
+
+:root {
+  --background: #F8FAFC;
+  --foreground: #071324;
+
+  /* Brand Palette (Flourish Women's Midnight Sapphire Silk Gradient) */
+  --color-navy: #051326;
+  --color-navy-dark: #020A14;
+  --color-navy-mid: #08203E;
+  --color-navy-light: #0C2B4E;
+  --color-navy-shimmer: #0F3A69;
+  --color-navy-border: #163860;
+  
+  /* Primary Accent: Electric Sky Blue & Neon Cyan */
+  --color-accent: #38BDF8;
+  --color-accent-hover: #0EA5E9;
+  --color-accent-dark: #0284C7;
+  --color-accent-light: #E0F2FE;
+  
+  /* Legacy mapped aliases for effortless backwards compatibility */
+  --color-gold: #38BDF8;
+  --color-gold-dark: #0284C7;
+  --color-gold-light: #BAE6FD;
+  
+  --color-sand: #F0F6FA;
+  --color-linen: #E2E8F0;
+  --color-maroon: #832729;
+  --color-forest: #0D3B38;
+  --color-ivory: #F8FAFC;
+  --color-charcoal: #051326;
+}
+
+@theme {
+  --font-serif: var(--font-serif), Georgia, serif;
+  --font-sans: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  --color-navy: #051326;
+  --color-navy-dark: #020A14;
+  --color-navy-mid: #08203E;
+  --color-navy-light: #0C2B4E;
+  --color-navy-shimmer: #0F3A69;
+  --color-navy-border: #163860;
+  
+  --color-accent: #38BDF8;
+  --color-accent-hover: #0EA5E9;
+  --color-accent-dark: #0284C7;
+  --color-accent-light: #E0F2FE;
+  
+  --color-ivory: #F8FAFC;
+  --color-sand: #F0F6FA;
+  --color-linen: #E2E8F0;
+  
+  --color-gold: #38BDF8;
+  --color-gold-dark: #0284C7;
+  --color-gold-light: #BAE6FD;
+  
+  --color-maroon: #832729;
+  --color-forest: #0D3B38;
+  
+  --color-charcoal-900: #020A14;
+  --color-charcoal-700: #0C2B4E;
+  --color-charcoal-500: #64748B;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  position: relative;
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+.container {
+  width: 100%;
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Custom scrollbar utility for luxury carousels */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Hero dot indicators */
+.hero-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.hero-dot.active {
+  width: 24px;
+  border-radius: 3px;
+  background: #38BDF8;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+}
+
+/* Smooth fade animations */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeInUp {
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+/* Category filter tabs */
+.filter-tab {
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.filter-tab.active {
+  background: var(--color-navy);
+  color: #38BDF8;
+  border-color: #38BDF8;
+}
+.filter-tab:not(.active) {
+  background: white;
+  color: var(--color-charcoal-700);
+  border-color: var(--color-linen);
+}
+.filter-tab:not(.active):hover {
+  border-color: #38BDF8;
+  color: #0284C7;
+}
+
+/* Glow effects */
+.glow-accent {
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.35);
+}
+
+/* Royal Sapphire Silk Gradient utility classes */
+.bg-silk-navy {
+  background: linear-gradient(135deg, #092648 0%, #051830 40%, #020A14 100%);
+}
+
+.bg-silk-navy-header {
+  background: linear-gradient(90deg, #030D1A 0%, #082444 35%, #0A2F59 50%, #082444 65%, #030D1A 100%);
+}
+
+.bg-silk-navy-card {
+  background: linear-gradient(145deg, #0B2B4E 0%, #061A32 55%, #020C18 100%);
+}
+
+.bg-silk-shimmer {
+  background: radial-gradient(ellipse 90% 70% at 20% 0%, rgba(15, 58, 105, 0.6), transparent 70%),
+              linear-gradient(135deg, #0A2748 0%, #05162D 50%, #020A14 100%);
+}
+.glow-accent-hover:hover {
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
+}
+
+/* Hide scrollbar utilities */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Custom Luxury Range Slider Styling */
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #0284C7;
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 1px 4px rgba(2, 132, 199, 0.4), 0 0 0 1px rgba(2, 132, 199, 0.2);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+input[type='range']::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.6), 0 0 0 3px rgba(56, 189, 248, 0.3);
+}
+
+input[type='range']::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #0284C7;
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 1px 4px rgba(2, 132, 199, 0.4);
+  cursor: pointer;
+}
+
