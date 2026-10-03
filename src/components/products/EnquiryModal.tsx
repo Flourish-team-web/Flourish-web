@@ -4,7 +4,7 @@ import * as React from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { MessageCircle, CheckCircle2, ShieldCheck, Sparkles } from 'lucide-react';
+import { MessageCircle, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { formatCurrencyINR } from '@/lib/utils/formatters';
 
 interface EnquiryModalProps {

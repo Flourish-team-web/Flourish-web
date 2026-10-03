@@ -1,7 +1,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { Button } from './Button';
-import { Sparkles } from 'lucide-react';
+import { PackageOpen } from 'lucide-react';
 
 interface EmptyStateProps {
   title?: string;
@@ -21,7 +21,7 @@ export function EmptyState({
   return (
     <div className="text-center py-16 px-4 max-w-md mx-auto my-8 border border-dashed border-[#E0D8C8] bg-[#FAF8F5] p-8">
       <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#F4EFE6] text-[#C5A059] mb-4">
-        {icon || <Sparkles className="w-5 h-5" />}
+        {icon || <PackageOpen className="w-5 h-5" />}
       </div>
       <h3 className="font-serif text-xl text-[#1A1816] mb-2">{title}</h3>
       <p className="text-sm text-[#706B64] font-light mb-6 leading-relaxed">

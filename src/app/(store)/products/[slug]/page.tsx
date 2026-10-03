@@ -113,7 +113,6 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                 subtitle="More handpicked drapes crafted by master artisans"
                 viewAllLink="/products"
                 products={relatedProducts}
-                showFilters={false}
               />
             </div>
           )}

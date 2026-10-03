@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { ProductWithDetails, Category, Collection } from '@/types/store.types';
+import { ProductWithDetails, Category } from '@/types/store.types';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { MediaUploader } from './MediaUploader';
@@ -16,15 +16,12 @@ import {
   Package,
   Image as ImageIcon,
   Ruler,
-  Tag,
   Eye,
   EyeOff,
-  Sparkles,
+  Tag,
   TrendingUp,
   Star,
-  IndianRupee,
   FileText,
-  Layers,
 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils/cn';
@@ -38,7 +35,6 @@ export function ProductForm({ initialProduct }: ProductFormProps) {
   const isEditing = !!initialProduct;
 
   const [categories, setCategories] = React.useState<Category[]>([]);
-  const [collections, setCollections] = React.useState<Collection[]>([]);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
@@ -49,8 +45,7 @@ export function ProductForm({ initialProduct }: ProductFormProps) {
   const [price, setPrice] = React.useState(initialProduct?.price?.toString() || '');
   const [comparePrice, setComparePrice] = React.useState(initialProduct?.compare_price?.toString() || '');
   const [categoryId, setCategoryId] = React.useState(initialProduct?.category_id || '');
-  const [collectionId, setCollectionId] = React.useState(initialProduct?.collection_id || '');
-  
+
   // Textile Specs
   const [fabric, setFabric] = React.useState(initialProduct?.fabric || '');
   const [sareeType, setSareeType] = React.useState(initialProduct?.saree_type || '');
@@ -77,12 +72,8 @@ export function ProductForm({ initialProduct }: ProductFormProps) {
   React.useEffect(() => {
     const fetchRelations = async () => {
       const supabase = createClient();
-      const [{ data: cats }, { data: cols }] = await Promise.all([
-        supabase.from('categories').select('*').eq('is_active', true).order('name'),
-        supabase.from('collections').select('*').eq('is_active', true).order('name'),
-      ]);
+      const { data: cats } = await supabase.from('categories').select('*').eq('is_active', true).order('name');
       if (cats) setCategories(cats);
-      if (cols) setCollections(cols);
     };
     fetchRelations();
   }, []);
@@ -124,7 +115,7 @@ export function ProductForm({ initialProduct }: ProductFormProps) {
         price: parseFloat(price),
         compare_price: comparePrice ? parseFloat(comparePrice) : null,
         category_id: categoryId || null,
-        collection_id: collectionId || null,
+        collection_id: initialProduct?.collection_id || null,
         fabric: fabric.trim() || null,
         saree_type: sareeType.trim() || null,
         color: color.trim() || null,
@@ -290,7 +281,7 @@ export function ProductForm({ initialProduct }: ProductFormProps) {
           </div>
 
           <Input
-            label="SKU / Item Code"
+            label="Product Code"
             value={sku}
             onChange={(e) => setSku(e.target.value)}
             placeholder="e.g. FW-KAN-001"
@@ -341,39 +332,21 @@ export function ProductForm({ initialProduct }: ProductFormProps) {
           </div>
         )}
 
-        {/* Category & Collection */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-          <div className="space-y-1.5">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[#0F172A]">
-              Weave Category
-            </label>
-            <select
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-              className="w-full bg-[#F8FAFC] border border-[#CBD5E1] rounded-xl px-3.5 py-2.5 text-xs text-[#0F172A] focus:border-[#0284C7] focus:bg-white focus:outline-none transition-all cursor-pointer font-medium"
-            >
-              <option value="">— Select Category —</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[#0F172A]">
-              Curated Collection (Optional)
-            </label>
-            <select
-              value={collectionId}
-              onChange={(e) => setCollectionId(e.target.value)}
-              className="w-full bg-[#F8FAFC] border border-[#CBD5E1] rounded-xl px-3.5 py-2.5 text-xs text-[#0F172A] focus:border-[#0284C7] focus:bg-white focus:outline-none transition-all cursor-pointer font-medium"
-            >
-              <option value="">— Select Collection —</option>
-              {collections.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
-          </div>
+        {/* Category */}
+        <div className="space-y-1.5 pt-1">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-[#0F172A]">
+            Weave Category
+          </label>
+          <select
+            value={categoryId}
+            onChange={(e) => setCategoryId(e.target.value)}
+            className="w-full bg-[#F8FAFC] border border-[#CBD5E1] rounded-xl px-3.5 py-2.5 text-xs text-[#0F172A] focus:border-[#0284C7] focus:bg-white focus:outline-none transition-all cursor-pointer font-medium"
+          >
+            <option value="">— Select Category —</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -502,14 +475,14 @@ export function ProductForm({ initialProduct }: ProductFormProps) {
       {/* 5. Badges & Storefront Highlights */}
       <div className="bg-white border border-[#E2E8F0] rounded-2xl p-5 sm:p-6 space-y-3 shadow-xs">
         <div className="flex items-center gap-2 border-b border-[#F1F5F9] pb-3">
-          <Sparkles className="w-4 h-4 text-[#0284C7]" />
+          <Tag className="w-4 h-4 text-[#0284C7]" />
           <h2 className="font-serif text-base text-[#0F172A] font-medium">5. Storefront Badges & Visibility</h2>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 pt-1">
           {[
             { label: 'Published on Store', icon: Eye, state: isPublished, setState: setIsPublished, activeColor: 'text-emerald-600' },
-            { label: 'New Arrival Badge', icon: Sparkles, state: isNewArrival, setState: setIsNewArrival, activeColor: 'text-[#0284C7]' },
+            { label: 'New Arrival Badge', icon: Tag, state: isNewArrival, setState: setIsNewArrival, activeColor: 'text-[#0284C7]' },
             { label: 'Bestseller Badge', icon: TrendingUp, state: isBestseller, setState: setIsBestseller, activeColor: 'text-rose-500' },
             { label: 'Featured Highlight', icon: Star, state: isFeatured, setState: setIsFeatured, activeColor: 'text-amber-500' },
           ].map(({ label, icon: Icon, state, setState, activeColor }) => (

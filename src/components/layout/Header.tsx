@@ -6,6 +6,8 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Search, Heart, ShoppingBag, Menu, MessageCircle, ChevronDown } from 'lucide-react';
 import { useWishlist } from '@/hooks/useWishlist';
+import { useCart } from '@/hooks/useCart';
+import { CartDrawer } from '@/components/cart/CartDrawer';
 import { SearchModal } from './SearchModal';
 import { Drawer } from '@/components/ui/Drawer';
 import { BrandLogo, FlourishIcon } from '@/components/ui/BrandLogo';
@@ -26,7 +28,9 @@ const NAV_LINKS = [
 export function Header() {
   const pathname = usePathname();
   const { count: wishlistCount } = useWishlist();
+  const { totalCount: cartCount } = useCart();
   const [isSearchOpen, setIsSearchOpen] = React.useState(false);
+  const [isCartOpen, setIsCartOpen] = React.useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const [isScrolled, setIsScrolled] = React.useState(false);
   const [categories, setCategories] = React.useState<Category[]>(FALLBACK_CATEGORIES);
@@ -218,18 +222,20 @@ export function Header() {
               </Link>
 
               {/* Shopping Bag CTA / Cart (Mobile & Desktop) */}
-              <a
-                href={buildBespokeWhatsAppUrl('919876543210')}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center p-2 text-white/80 hover:text-[#38BDF8] hover:scale-105 transition-all relative"
-                title="Shopping Bag / Connect on WhatsApp"
+              <button
+                type="button"
+                onClick={() => setIsCartOpen(true)}
+                className="flex items-center justify-center p-2 text-white/80 hover:text-[#38BDF8] hover:scale-105 transition-all relative cursor-pointer"
+                title="View Shopping Bag"
+                aria-label="View Shopping Bag"
               >
                 <ShoppingBag className="w-5 h-5 stroke-[1.75]" />
-                <span className="absolute top-1 right-1 bg-[#0284C7] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-[0_0_8px_rgba(56,189,248,0.8)]">
-                  0
-                </span>
-              </a>
+                {cartCount > 0 && (
+                  <span className="absolute top-1 right-1 bg-[#0284C7] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-[0_0_8px_rgba(56,189,248,0.8)] animate-in zoom-in">
+                    {cartCount}
+                  </span>
+                )}
+              </button>
 
               {/* Mobile menu trigger (Right side on mobile) */}
               <button
@@ -243,6 +249,9 @@ export function Header() {
           </div>
         </div>
       </header>
+
+      {/* Shopping Bag Drawer */}
+      <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
 
       {/* Global Search Dialog */}
       <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />

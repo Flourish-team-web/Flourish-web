@@ -178,7 +178,7 @@ export function MediaUploader({
             <button
               type="button"
               onClick={() => handleRemove(idx)}
-              className="absolute top-2 right-2 w-6 h-6 rounded-full bg-rose-600 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 shadow-sm cursor-pointer hover:bg-rose-700"
+              className="absolute top-2 right-2 w-6 h-6 rounded-full bg-rose-600 text-white flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity z-10 shadow-sm cursor-pointer hover:bg-rose-700"
               title="Remove media"
             >
               <X className="w-3.5 h-3.5" />
@@ -186,7 +186,7 @@ export function MediaUploader({
 
             {/* Reorder controls for multiple images */}
             {isMultiple && fileList.length > 1 && (
-              <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity z-10 bg-black/75 backdrop-blur-xs p-1 rounded-lg">
+              <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity z-10 bg-black/75 backdrop-blur-xs p-1 rounded-lg">
                 <button
                   type="button"
                   disabled={idx === 0}

@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import { SiteSettings } from '@/types/store.types';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { Save, CheckCircle2, AlertCircle, Loader2, Phone, Mail, MapPin, Sparkles, Share2 } from 'lucide-react';
+import { Save, CheckCircle2, AlertCircle, Loader2, Phone, Mail, MapPin, Award, Share2 } from 'lucide-react';
 
 export default function AdminSettingsPage() {
   const [settings, setSettings] = React.useState<SiteSettings | null>(null);
@@ -176,7 +176,7 @@ export default function AdminSettingsPage() {
       {/* 2. Brand Identity & Tagline */}
       <div className="bg-[#FDFBF7] border border-[#EAE3D2] p-6 space-y-4">
         <div className="flex items-center gap-2 border-b border-[#EAE3D2] pb-2">
-          <Sparkles className="w-4 h-4 text-[#C5A059]" />
+          <Award className="w-4 h-4 text-[#C5A059]" />
           <h3 className="font-serif text-base text-[#1A1816]">Brand Information</h3>
         </div>
 

@@ -323,7 +323,7 @@ export default function AdminEnquiriesPage() {
                   </div>
 
                   {/* Right: Status change + Actions */}
-                  <div className="flex flex-row lg:flex-col items-center lg:items-end gap-3 shrink-0 border-t lg:border-t-0 lg:border-l lg:border-[#F1F5F9] pt-3 lg:pt-0 lg:pl-5">
+                  <div className="flex flex-col sm:flex-row lg:flex-col items-stretch sm:items-center lg:items-end gap-3 shrink-0 border-t lg:border-t-0 lg:border-l lg:border-[#F1F5F9] pt-3 lg:pt-0 lg:pl-5 w-full lg:w-auto">
                     <div className="space-y-1.5 w-full lg:w-44">
                       <label className="text-[10px] uppercase tracking-wider text-[#64748B] font-semibold block">
                         Update Status
