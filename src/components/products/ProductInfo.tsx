@@ -16,7 +16,7 @@ import {
 import { ProductWithDetails } from '@/types/store.types';
 import { formatCurrencyINR, calculateDiscountPercentage } from '@/lib/utils/formatters';
 import { useCart } from '@/hooks/useCart';
-import { buildProductWhatsAppUrl } from '@/lib/whatsapp/urlBuilder';
+import { EnquiryModal } from '@/components/products/EnquiryModal';
 import { cn } from '@/lib/utils/cn';
 
 interface ProductInfoProps {
@@ -26,6 +26,7 @@ interface ProductInfoProps {
 export function ProductInfo({ product }: ProductInfoProps) {
   const { addToCart } = useCart();
   const [isAdded, setIsAdded] = React.useState(false);
+  const [isEnquiryModalOpen, setIsEnquiryModalOpen] = React.useState(false);
 
   const discount = calculateDiscountPercentage(product.price, product.compare_price);
   const primaryImage = product.images?.[0]?.image_url || '/images/placeholder-saree.svg';
@@ -34,14 +35,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
   const categoryName = product.category?.name || product.fabric || 'Pure Silk';
 
   const handleWhatsAppOrder = () => {
-    const url = typeof window !== 'undefined' ? `${window.location.origin}/products/${product.slug}` : undefined;
-    const waUrl = buildProductWhatsAppUrl('919876543210', {
-      productName: product.name,
-      sku: product.sku,
-      price: product.price,
-      productUrl: url,
-    });
-    window.open(waUrl, '_blank', 'noopener,noreferrer');
+    setIsEnquiryModalOpen(true);
   };
 
   const handleAddToCart = () => {
@@ -217,6 +211,13 @@ export function ProductInfo({ product }: ProductInfoProps) {
           <span>Direct Weaver Heritage</span>
         </div>
       </div>
+
+      {/* WhatsApp Order Modal */}
+      <EnquiryModal
+        isOpen={isEnquiryModalOpen}
+        onClose={() => setIsEnquiryModalOpen(false)}
+        product={product}
+      />
     </div>
   );
 }

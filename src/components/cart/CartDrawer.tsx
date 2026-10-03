@@ -51,7 +51,8 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
     message += `Please confirm availability and share payment/dispatch details. Thank you!`;
 
     const encoded = encodeURIComponent(message);
-    const waUrl = `https://wa.me/919876543210?text=${encoded}`;
+    const targetNumber = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '919876543210').replace(/[^0-9]/g, '');
+    const waUrl = `https://wa.me/${targetNumber}?text=${encoded}`;
     window.open(waUrl, '_blank', 'noopener,noreferrer');
   };
 
