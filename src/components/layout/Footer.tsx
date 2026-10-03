@@ -66,7 +66,7 @@ export function Footer() {
             </p>
             <div className="pt-2">
               <a
-                href={buildBespokeWhatsAppUrl('919876543210')}
+                href={buildBespokeWhatsAppUrl(undefined)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-xs uppercase tracking-widest text-[#38BDF8] hover:text-[#7DD3FC] hover:underline font-medium transition-colors"

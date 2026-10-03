@@ -55,7 +55,7 @@ export function MobileNav() {
 
         {/* Quick WhatsApp Concierge Button */}
         <a
-          href={buildBespokeWhatsAppUrl('919876543210')}
+          href={buildBespokeWhatsAppUrl(undefined)}
           target="_blank"
           rel="noopener noreferrer"
           className="flex flex-col items-center justify-center py-1 px-3 text-white/60 hover:text-[#38BDF8] transition-colors"

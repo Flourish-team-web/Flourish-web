@@ -338,7 +338,7 @@ export function Header() {
 
           <div className="border-t border-[#E2E8F0] pt-6 space-y-4">
             <a
-              href={buildBespokeWhatsAppUrl('919876543210')}
+              href={buildBespokeWhatsAppUrl(undefined)}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full flex items-center justify-center gap-2 bg-[#071324] text-white py-3 text-xs uppercase tracking-widest font-medium hover:bg-[#0E2038] hover:text-[#38BDF8] transition-all rounded shadow-md"
