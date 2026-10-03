@@ -230,7 +230,7 @@ export default function AdminCategoriesPage() {
                     </td>
 
                     <td className="px-4 py-3.5 text-right">
-                      <div className="inline-flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="inline-flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => openEditModal(cat)}
                           className="p-1.5 rounded-lg text-[#94A3B8] hover:text-[#0284C7] hover:bg-[#EFF6FF] transition-colors cursor-pointer"

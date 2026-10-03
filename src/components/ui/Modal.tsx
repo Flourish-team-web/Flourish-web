@@ -46,11 +46,11 @@ export function Modal({ isOpen, onClose, title, children, className }: ModalProp
         role="dialog"
         aria-modal="true"
         className={cn(
-          'relative z-10 w-full max-w-lg bg-[#FAF8F5] border border-[#E0D8C8] shadow-2xl p-6 sm:p-8 animate-in fade-in-0 zoom-in-95 duration-200',
+          'relative z-10 w-full max-w-lg bg-[#FAF8F5] border border-[#E0D8C8] shadow-2xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 max-h-[92vh] overflow-y-auto animate-in fade-in-0 zoom-in-95 duration-200',
           className
         )}
       >
-        <div className="flex items-center justify-between pb-4 border-b border-[#EAE3D2] mb-6">
+        <div className="flex items-center justify-between pb-3.5 border-b border-[#EAE3D2] mb-5">
           {title ? (
             <h3 className="font-serif text-xl text-[#1A1816] tracking-tight">{title}</h3>
           ) : (

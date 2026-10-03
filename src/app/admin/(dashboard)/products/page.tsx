@@ -14,7 +14,6 @@ import {
   CheckCircle2,
   XCircle,
   Star,
-  Sparkles,
   Loader2,
   Package,
   Filter,
@@ -143,7 +142,7 @@ export default function AdminProductsPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8]" />
           <input
             type="text"
-            placeholder="Search by name, SKU, or fabric..."
+            placeholder="Search by name, Product Code, or fabric..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl pl-9 pr-4 py-2.5 text-xs text-[#0F172A] placeholder-[#94A3B8] focus:border-[#0284C7] focus:bg-white focus:outline-none transition-all"
@@ -289,7 +288,7 @@ export default function AdminProductsPage() {
                       </td>
 
                       <td className="px-4 py-3.5 text-right">
-                        <div className="inline-flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="inline-flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                           <Link
                             href={`/products/${p.slug}`}
                             target="_blank"

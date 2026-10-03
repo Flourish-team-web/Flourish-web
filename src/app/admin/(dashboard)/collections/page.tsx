@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { MediaUploader } from '@/components/admin/MediaUploader';
 import { slugify } from '@/lib/utils/formatters';
-import { Plus, Edit2, Trash2, CheckCircle2, XCircle, Star, Loader2, AlertCircle, Sparkles } from 'lucide-react';
+import { Plus, Edit2, Trash2, CheckCircle2, XCircle, Star, Loader2, AlertCircle, FolderKanban } from 'lucide-react';
 
 export default function AdminCollectionsPage() {
   const [collections, setCollections] = React.useState<Collection[]>([]);
@@ -136,9 +136,8 @@ export default function AdminCollectionsPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Sparkles className="w-4 h-4 text-amber-500" />
-            <span className="text-[11px] uppercase tracking-widest text-amber-500 font-semibold">
+          <div className="mb-1">
+            <span className="text-[11px] uppercase tracking-widest text-[#0284C7] font-semibold">
               Curated Edits
             </span>
           </div>
@@ -235,7 +234,7 @@ export default function AdminCollectionsPage() {
                     </td>
 
                     <td className="px-4 py-3.5 text-right">
-                      <div className="inline-flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="inline-flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => openEditModal(col)}
                           className="p-1.5 rounded-lg text-[#94A3B8] hover:text-[#0284C7] hover:bg-[#EFF6FF] transition-colors cursor-pointer"
@@ -260,8 +259,8 @@ export default function AdminCollectionsPage() {
         </div>
       ) : (
         <div className="bg-white border border-dashed border-[#CBD5E1] rounded-2xl text-center py-20">
-          <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <Sparkles className="w-6 h-6 text-amber-400" />
+          <div className="w-14 h-14 bg-sky-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <FolderKanban className="w-6 h-6 text-[#0284C7]" />
           </div>
           <p className="font-serif text-lg text-[#0F172A] mb-1">No Collections Yet</p>
           <p className="text-xs text-[#64748B] font-light mb-5">
