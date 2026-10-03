@@ -1,3 +1,5 @@
+const DEFAULT_WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '919876543210';
+
 interface ProductEnquiryPayload {
   productName: string;
   sku?: string | null;
@@ -9,11 +11,16 @@ interface ProductEnquiryPayload {
  * Builds a direct WhatsApp enquiry click-to-chat URL.
  */
 export function buildProductWhatsAppUrl(
-  phoneNumber: string = '919876543210',
-  payload: ProductEnquiryPayload
+  phoneNumber?: string,
+  payload?: ProductEnquiryPayload
 ): string {
-  const cleanNumber = phoneNumber.replace(/[^0-9]/g, '');
+  const targetNumber = phoneNumber || DEFAULT_WHATSAPP_NUMBER;
+  const cleanNumber = targetNumber.replace(/[^0-9]/g, '') || DEFAULT_WHATSAPP_NUMBER;
   
+  if (!payload) {
+    return buildBespokeWhatsAppUrl(cleanNumber);
+  }
+
   const priceText = payload.price 
     ? `\nPrice: ₹${new Intl.NumberFormat('en-IN').format(payload.price)}` 
     : '';
@@ -29,10 +36,11 @@ export function buildProductWhatsAppUrl(
  * Builds a bespoke bridal / styling assistance WhatsApp URL.
  */
 export function buildBespokeWhatsAppUrl(
-  phoneNumber: string = '919876543210',
+  phoneNumber?: string,
   customNote?: string
 ): string {
-  const cleanNumber = phoneNumber.replace(/[^0-9]/g, '');
+  const targetNumber = phoneNumber || DEFAULT_WHATSAPP_NUMBER;
+  const cleanNumber = targetNumber.replace(/[^0-9]/g, '') || DEFAULT_WHATSAPP_NUMBER;
   const note = customNote || 'I would like to inquire about your curated saree collection and bespoke styling.';
   const message = `Namaste Flourish Women's,\n\n${note}\n\nCould you please connect me with a stylist?`;
   return `https://wa.me/${cleanNumber}?text=${encodeURIComponent(message)}`;

@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Search, Loader2, ArrowRight, Clock, X, Sparkles, Flame, Tag, Layers } from 'lucide-react';
+import { Search, Loader2, ArrowRight, Clock, X, Flame, Tag, Layers } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
 import { SearchSuggestion } from '@/types/store.types';
 import { cn } from '@/lib/utils/cn';
@@ -175,8 +175,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
           {suggestions.length > 0 ? (
             <div className="space-y-3">
               <div className="flex items-center justify-between pb-2 border-b border-[#163860]/80">
-                <span className="text-[11px] uppercase tracking-widest text-[#38BDF8] font-bold flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5" />
+                <span className="text-[11px] uppercase tracking-widest text-[#38BDF8] font-bold">
                   Instant Matches
                 </span>
                 <span className="text-[10px] text-white/40 font-mono">

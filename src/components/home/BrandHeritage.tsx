@@ -1,7 +1,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 export function BrandHeritage() {
@@ -25,8 +25,7 @@ export function BrandHeritage() {
 
           {/* Editorial Brand Narrative */}
           <div className="lg:col-span-6 space-y-6 text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#0E2038] border border-[#234573] rounded-full">
-              <Sparkles className="w-3.5 h-3.5 text-[#38BDF8]" />
+            <div className="inline-flex items-center px-3 py-1 bg-[#0E2038] border border-[#234573] rounded-full">
               <span className="text-[10px] font-sans tracking-[0.25em] uppercase text-[#38BDF8] font-semibold">
                 The Flourish Ethos
               </span>

@@ -1,7 +1,6 @@
 import * as React from 'react';
 import Image from 'next/image';
 import { PromotionalBanner } from '@/types/store.types';
-import { Sparkles, ShieldCheck, Award } from 'lucide-react';
 
 interface EditorialSpotlightProps {
   banners: PromotionalBanner[];
@@ -55,8 +54,7 @@ export function EditorialSpotlight({ banners }: EditorialSpotlightProps) {
               <div className="absolute inset-0 p-5 sm:p-6 md:p-7 flex flex-col justify-between max-w-[85%] sm:max-w-[78%] z-10">
                 <div className="space-y-2">
                   {banner.badge_text && (
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#0284C7]/20 border border-[#38BDF8]/40 text-[#38BDF8] text-[9px] sm:text-[10px] uppercase font-bold tracking-[0.2em] backdrop-blur-xs">
-                      <Sparkles className="w-3 h-3 text-[#38BDF8]" />
+                    <div className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-[#0284C7]/20 border border-[#38BDF8]/40 text-[#38BDF8] text-[9px] sm:text-[10px] uppercase font-bold tracking-[0.2em] backdrop-blur-xs">
                       <span>{banner.badge_text}</span>
                     </div>
                   )}

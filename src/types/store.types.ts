@@ -52,6 +52,18 @@ export interface WishlistItem {
   addedAt: string;
 }
 
+export interface CartItem {
+  productId: string;
+  slug: string;
+  name: string;
+  price: number;
+  imageUrl: string;
+  fabric?: string | null;
+  sku?: string | null;
+  quantity: number;
+  addedAt: string;
+}
+
 export interface SearchSuggestion {
   type: 'product' | 'category' | 'collection';
   id: string;
@@ -60,3 +72,4 @@ export interface SearchSuggestion {
   url: string;
   imageUrl?: string;
 }
+

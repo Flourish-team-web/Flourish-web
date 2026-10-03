@@ -4,7 +4,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
 import {
   Package,
   Layers,
-  Sparkles,
+  FolderKanban,
   MessageSquare,
   Plus,
   ArrowUpRight,
@@ -66,7 +66,7 @@ export default async function AdminDashboardPage() {
       title: 'Collections',
       subtitle: 'Curated edits',
       count: collectionsCount ?? 0,
-      icon: Sparkles,
+      icon: FolderKanban,
       href: '/admin/collections',
       label: 'Manage',
       gradient: 'from-amber-500 to-orange-400',

@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
-import { SlidersHorizontal, RotateCcw, Check, Sparkles } from 'lucide-react';
+import { SlidersHorizontal, RotateCcw, Check } from 'lucide-react';
 import { Drawer } from '@/components/ui/Drawer';
 import { Button } from '@/components/ui/Button';
 import { createClient } from '@/lib/supabase/client';
@@ -137,7 +137,6 @@ export function ProductFilters() {
       {hasActiveFilters && (
         <div className="flex items-center justify-between pb-3 border-b border-[#F1F5F9]">
           <span className="text-xs text-[#0284C7] font-semibold flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5" />
             {activeFiltersCount} filter{activeFiltersCount > 1 ? 's' : ''} applied
           </span>
           <button

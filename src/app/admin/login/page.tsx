@@ -5,7 +5,7 @@ import { Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
-import { Shield, AlertCircle, ArrowLeft, Mail, Lock, Eye, EyeOff, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Shield, AlertCircle, ArrowLeft, Mail, Lock, Eye, EyeOff, CheckCircle2, ArrowRight } from 'lucide-react';
 
 import { BrandLogo } from '@/components/ui/BrandLogo';
 
@@ -192,8 +192,8 @@ function AdminLoginForm() {
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-4 h-4" />
                   <span>Authenticate & Enter</span>
+                  <ArrowRight className="w-4 h-4" />
                 </>
               )}
             </button>

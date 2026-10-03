@@ -62,14 +62,13 @@ export default async function HomePage() {
         {/* 4. The Flourish Edit (3-column promotional banners - showcase without redirects) */}
         <EditorialSpotlight banners={promotionalBanners} />
 
-        {/* 5. New Arrivals with filter tabs */}
+        {/* 5. New Arrivals */}
         <ProductCarouselSection
           eyebrow="Fresh Off The Loom"
           title="New Arrivals"
           subtitle="The latest handpicked creations from master weavers across India"
           viewAllLink="/products?sort=newest"
           products={newArrivals}
-          showFilters={true}
         />
 
         {/* 6. Featured Masterpieces */}
@@ -80,7 +79,6 @@ export default async function HomePage() {
             subtitle="Timeless classics chosen by our styling team"
             viewAllLink="/products?sort=featured"
             products={featuredProducts}
-            showFilters={false}
           />
         )}
 

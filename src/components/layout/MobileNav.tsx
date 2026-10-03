@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, ShoppingBag, Heart, MessageCircle, Sparkles } from 'lucide-react';
+import { Home, ShoppingBag, Heart, MessageCircle, Layers } from 'lucide-react';
 import { useWishlist } from '@/hooks/useWishlist';
 import { buildBespokeWhatsAppUrl } from '@/lib/whatsapp/urlBuilder';
 import { cn } from '@/lib/utils/cn';
@@ -19,7 +19,7 @@ export function MobileNav() {
 
   const navItems = [
     { label: 'Home', href: '/', icon: Home },
-    { label: 'Collections', href: '/products', icon: Sparkles },
+    { label: 'Collections', href: '/products', icon: Layers },
     { label: 'New Arrivals', href: '/products?sort=newest', icon: ShoppingBag },
     { label: 'Wishlist', href: '/wishlist', icon: Heart, badge: wishlistCount },
   ];

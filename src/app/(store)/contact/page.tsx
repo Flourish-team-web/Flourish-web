@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { MessageCircle, Phone, Mail, MapPin, Sparkles, CheckCircle2 } from 'lucide-react';
+import { MessageCircle, Phone, Mail, MapPin, CheckCircle2 } from 'lucide-react';
 import { buildBespokeWhatsAppUrl } from '@/lib/whatsapp/urlBuilder';
 
 export default function ContactPage() {
@@ -170,8 +170,7 @@ export default function ContactPage() {
           {/* Right Column: Direct Channels & Concierge Card */}
           <div className="lg:col-span-5 space-y-6">
             <div className="bg-[#1B4332] text-[#FDFBF7] p-6 sm:p-8 shadow-md space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#143225] text-[#A3E3C6] text-[10px] font-sans uppercase tracking-widest font-semibold">
-                <Sparkles className="w-3 h-3" />
+              <div className="inline-flex items-center px-3 py-1 bg-[#143225] text-[#A3E3C6] text-[10px] font-sans uppercase tracking-widest font-semibold">
                 <span>Instant Stylist Access</span>
               </div>
               <h3 className="font-serif text-2xl text-white">Direct WhatsApp Concierge</h3>
