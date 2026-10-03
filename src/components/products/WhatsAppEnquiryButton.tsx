@@ -29,13 +29,13 @@ export function WhatsAppEnquiryButton({
   const currentUrl = typeof window !== 'undefined' ? (productUrl || window.location.href) : productUrl;
 
   const href = productName
-    ? buildProductWhatsAppUrl('919876543210', {
+    ? buildProductWhatsAppUrl(undefined, {
         productName,
         sku,
         price,
         productUrl: currentUrl,
       })
-    : buildBespokeWhatsAppUrl('919876543210');
+    : buildBespokeWhatsAppUrl(undefined);
 
   const defaultLabel = productName ? 'Enquire on WhatsApp' : 'Connect with Stylist';
 
