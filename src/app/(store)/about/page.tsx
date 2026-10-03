@@ -111,7 +111,7 @@ export default function AboutPage() {
               <Button variant="primary" size="lg">Explore Collection</Button>
             </Link>
             <a
-              href={buildBespokeWhatsAppUrl('919876543210')}
+              href={buildBespokeWhatsAppUrl(undefined)}
               target="_blank"
               rel="noopener noreferrer"
             >

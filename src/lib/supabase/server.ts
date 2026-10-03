@@ -2,8 +2,12 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { Database } from '@/types/database.types';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey =
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+  '';
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
 export async function createServerSupabaseClient() {
   let cookieStore: Awaited<ReturnType<typeof cookies>> | undefined;
@@ -32,6 +36,21 @@ export async function createServerSupabaseClient() {
             // Ignored if called from Server Component
           }
         },
+      },
+    }
+  );
+}
+
+export function createAdminSupabaseClient() {
+  return createServerClient<Database>(
+    supabaseUrl,
+    supabaseServiceRoleKey || supabaseAnonKey,
+    {
+      cookies: {
+        getAll() {
+          return [];
+        },
+        setAll() {},
       },
     }
   );

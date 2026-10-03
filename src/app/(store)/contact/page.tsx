@@ -83,7 +83,7 @@ export default function ContactPage() {
                 </p>
                 <div className="pt-4">
                   <a
-                    href={buildBespokeWhatsAppUrl('919876543210', `Hi, I submitted an enquiry for ${formData.occasion || 'styling'}. My name is ${formData.name}.`)}
+                    href={buildBespokeWhatsAppUrl(undefined, `Hi, I submitted an enquiry for ${formData.occasion || 'styling'}. My name is ${formData.name}.`)}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -179,7 +179,7 @@ export default function ContactPage() {
               </p>
               <div className="pt-2">
                 <a
-                  href={buildBespokeWhatsAppUrl('919876543210')}
+                  href={buildBespokeWhatsAppUrl(undefined)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center gap-2 bg-white text-[#1B4332] hover:bg-[#FAF8F5] py-3 px-6 text-xs uppercase tracking-widest font-medium transition-all w-full text-center"

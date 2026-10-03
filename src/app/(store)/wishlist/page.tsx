@@ -24,7 +24,7 @@ export default function WishlistPage() {
   const handleInquireAll = () => {
     const itemNames = wishlist.map((item) => item.name).join(', ');
     const note = `I would like to inquire about the availability of the following wishlist sarees: ${itemNames}`;
-    const url = buildBespokeWhatsAppUrl('919876543210', note);
+    const url = buildBespokeWhatsAppUrl(undefined, note);
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
@@ -105,7 +105,7 @@ export default function WishlistPage() {
 
                 <div className="flex items-center gap-2 pt-2 border-t border-[#E2E8F0]">
                   <a
-                    href={buildProductWhatsAppUrl('919876543210', {
+                    href={buildProductWhatsAppUrl(undefined, {
                       productName: item.name,
                       price: item.price,
                       productUrl: typeof window !== 'undefined' ? `${window.location.origin}/products/${item.slug}` : undefined,
