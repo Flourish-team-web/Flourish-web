@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { MessageCircle, Phone, Mail, MapPin, CheckCircle2 } from 'lucide-react';
+import { Phone, Mail, MapPin, CheckCircle2 } from 'lucide-react';
+import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
 import { buildBespokeWhatsAppUrl } from '@/lib/whatsapp/urlBuilder';
 
 export default function ContactPage() {
@@ -87,7 +88,8 @@ export default function ContactPage() {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <Button variant="gold" size="md">
+                    <Button variant="gold" size="md" className="inline-flex items-center gap-2">
+                      <WhatsAppIcon className="w-4 h-4" />
                       Chat Directly on WhatsApp →
                     </Button>
                   </a>
@@ -184,7 +186,7 @@ export default function ContactPage() {
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center gap-2 bg-white text-[#1B4332] hover:bg-[#FAF8F5] py-3 px-6 text-xs uppercase tracking-widest font-medium transition-all w-full text-center"
                 >
-                  <MessageCircle className="w-4 h-4" />
+                  <WhatsAppIcon className="w-4 h-4" />
                   <span>Start WhatsApp Chat</span>
                 </a>
               </div>

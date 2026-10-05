@@ -2,8 +2,9 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { RefreshCw, Home, MessageSquare } from 'lucide-react';
+import { RefreshCw, Home } from 'lucide-react';
 import { BrandLogo } from '@/components/ui/BrandLogo';
+import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
 import { buildBespokeWhatsAppUrl } from '@/lib/whatsapp/urlBuilder';
 
 export default function GlobalError({
@@ -71,7 +72,7 @@ export default function GlobalError({
               rel="noopener noreferrer"
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-[#0A2647]/80 hover:bg-[#0E325E] border border-[#1E4D7E] text-[#7DD3FC] text-xs uppercase tracking-widest font-medium transition-all"
             >
-              <MessageSquare className="w-3.5 h-3.5" />
+              <WhatsAppIcon className="w-3.5 h-3.5" />
               <span>Contact Concierge</span>
             </a>
           </div>

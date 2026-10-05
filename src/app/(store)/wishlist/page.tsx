@@ -6,7 +6,8 @@ import Image from 'next/image';
 import { useWishlist } from '@/hooks/useWishlist';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { formatCurrencyINR } from '@/lib/utils/formatters';
-import { Trash2, MessageCircle, Heart, ArrowRight, Layers } from 'lucide-react';
+import { Trash2, Heart, ArrowRight, Layers } from 'lucide-react';
+import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
 import { buildProductWhatsAppUrl, buildBespokeWhatsAppUrl } from '@/lib/whatsapp/urlBuilder';
 import { Button } from '@/components/ui/Button';
 
@@ -62,7 +63,7 @@ export default function WishlistPage() {
               onClick={handleInquireAll}
               className="bg-[#071324] hover:bg-[#0E2038] text-[#38BDF8] border border-[#38BDF8] flex items-center gap-1.5"
             >
-              <MessageCircle className="w-3.5 h-3.5 text-[#38BDF8]" />
+              <WhatsAppIcon className="w-3.5 h-3.5 text-[#38BDF8]" />
               <span>Inquire All on WhatsApp</span>
             </Button>
           </div>
@@ -114,7 +115,7 @@ export default function WishlistPage() {
                     rel="noopener noreferrer"
                     className="flex-1 bg-[#071324] hover:bg-[#0E2038] text-[#38BDF8] border border-[#38BDF8] py-2 px-3 text-[11px] uppercase tracking-wider font-semibold text-center flex items-center justify-center gap-1.5 transition-colors rounded"
                   >
-                    <MessageCircle className="w-3.5 h-3.5" />
+                    <WhatsAppIcon className="w-3.5 h-3.5 text-[#38BDF8]" />
                     <span>Enquire</span>
                   </a>
 

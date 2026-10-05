@@ -90,61 +90,47 @@ export async function POST(request: NextRequest) {
 
     const fullAddress = customerAddress || customerLocation || '';
 
-    // 4. Validate & Verify Item Details (if provided)
-    let validatedItem: {
+    // 4. Validate & Verify Item Details (Single item or multiple items from cart)
+    let validatedItems: Array<{
       productId: string | null;
       productName: string;
       sku: string | null;
       price: number | null;
       quantity: number;
       productUrl: string | null;
-    } | null = null;
+    }> = [];
 
-    if (body.item && typeof body.item === 'object') {
-      const rawItem = body.item;
-      const itemName = sanitizeText(rawItem.productName, 150);
+    const rawItemsList: any[] = Array.isArray(body.items)
+      ? body.items
+      : body.item && typeof body.item === 'object'
+      ? [body.item]
+      : [];
 
-      if (itemName) {
-        let itemQuantity = 1;
-        if (typeof rawItem.quantity === 'number' && Number.isFinite(rawItem.quantity)) {
-          itemQuantity = Math.max(1, Math.min(50, Math.floor(rawItem.quantity)));
-        }
+    for (const rawItem of rawItemsList) {
+      if (!rawItem || typeof rawItem !== 'object') continue;
+      const itemName = sanitizeText(rawItem.productName || rawItem.name, 150);
+      if (!itemName) continue;
 
-        let itemPrice: number | null = null;
-        if (typeof rawItem.price === 'number' && Number.isFinite(rawItem.price) && rawItem.price >= 0) {
-          itemPrice = rawItem.price;
-        }
-
-        const rawProductId = sanitizeText(rawItem.productId, 50) || null;
-
-        // If productId is a UUID, cross-verify price and name from database
-        if (rawProductId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rawProductId)) {
-          try {
-            const serverClient = await createServerSupabaseClient();
-            const { data: dbProduct } = await serverClient
-              .from('products')
-              .select('id, name, price, sku')
-              .eq('id', rawProductId)
-              .maybeSingle();
-
-            if (dbProduct) {
-              const productRec = dbProduct as { id: string; name: string; price: number; sku?: string };
-              itemPrice = productRec.price;
-            }
-          } catch {
-            // fallback to client-sent price if DB read is unreachable
-          }
-        }
-
-        validatedItem = {
-          productId: rawProductId,
-          productName: itemName,
-          sku: sanitizeText(rawItem.sku, 50) || null,
-          price: itemPrice,
-          quantity: itemQuantity,
-          productUrl: typeof rawItem.productUrl === 'string' ? sanitizeText(rawItem.productUrl, 300) : null,
-        };
+      let itemQuantity = 1;
+      if (typeof rawItem.quantity === 'number' && Number.isFinite(rawItem.quantity)) {
+        itemQuantity = Math.max(1, Math.min(50, Math.floor(rawItem.quantity)));
       }
+
+      let itemPrice: number | null = null;
+      if (typeof rawItem.price === 'number' && Number.isFinite(rawItem.price) && rawItem.price >= 0) {
+        itemPrice = rawItem.price;
+      }
+
+      const rawProductId = sanitizeText(rawItem.productId || rawItem.id, 50) || null;
+
+      validatedItems.push({
+        productId: rawProductId,
+        productName: itemName,
+        sku: sanitizeText(rawItem.sku, 50) || null,
+        price: itemPrice,
+        quantity: itemQuantity,
+        productUrl: typeof rawItem.productUrl === 'string' ? sanitizeText(rawItem.productUrl, 300) : null,
+      });
     }
 
     // 5. Resolve Trusted WhatsApp Business Number
@@ -170,22 +156,36 @@ export async function POST(request: NextRequest) {
     // 6. Build Professional WhatsApp Order Message
     let whatsappUrl: string;
 
-    if (validatedItem && validatedItem.productName) {
-      const priceFormatted = validatedItem.price !== null
-        ? `₹${new Intl.NumberFormat('en-IN').format(validatedItem.price)}`
-        : 'Price on Request';
-      const skuLine = validatedItem.sku ? `• *Product Code / SKU:* ${validatedItem.sku}\n` : '';
-      const qtyLine = validatedItem.quantity > 1 ? `• *Quantity:* ${validatedItem.quantity}\n` : '• *Quantity:* 1\n';
-      const urlLine = validatedItem.productUrl ? `• *Link:* ${validatedItem.productUrl}\n` : '';
+    if (validatedItems.length > 0) {
+      let itemsBlock = '';
+      let calculatedTotal = 0;
+
+      validatedItems.forEach((item, idx) => {
+        const itemTotal = (item.price || 0) * item.quantity;
+        calculatedTotal += itemTotal;
+        const formattedUnitPrice = item.price !== null
+          ? `₹${new Intl.NumberFormat('en-IN').format(item.price)}`
+          : 'Price on Request';
+        const formattedItemTotal = item.price !== null
+          ? `₹${new Intl.NumberFormat('en-IN').format(itemTotal)}`
+          : 'Price on Request';
+
+        itemsBlock += `*${idx + 1}. ${item.productName}*\n`;
+        if (item.sku) itemsBlock += `   • Code: #${item.sku}\n`;
+        itemsBlock += `   • Qty: ${item.quantity} × ${formattedUnitPrice} = ${formattedItemTotal}\n`;
+        if (item.productUrl) itemsBlock += `   • Link: ${item.productUrl}\n`;
+        itemsBlock += `\n`;
+      });
+
+      const formattedTotal = `₹${new Intl.NumberFormat('en-IN').format(calculatedTotal)}`;
       const addressLine = fullAddress ? `• *Delivery Address:*\n${fullAddress}\n` : '';
-      const noteLine = message ? `• *Customization Note:* ${message}\n` : '';
+      const noteLine = message ? `• *Customization / Note:* ${message}\n` : '';
 
-      const waMessage = `🛍️ *NEW SAREE ORDER — FLOURISH WOMEN'S*
+      const waMessage = `🛍️ *NEW FLOURISH WOMEN'S ORDER*
 
-*Product Details:*
-• *Saree:* ${validatedItem.productName}
-${skuLine}• *Price:* ${priceFormatted}
-${qtyLine}${urlLine}
+*Order Items (${validatedItems.length}):*
+${itemsBlock}*Total Order Amount:* ${formattedTotal}
+
 *Customer & Delivery Information:*
 • *Name:* ${customerName}
 • *WhatsApp / Phone:* ${rawPhone}
@@ -219,16 +219,18 @@ Please confirm availability, dispatch timeline, and payment options. Thank you!`
       if (!enquiryError && enquiryData) {
         recordedEnquiryId = enquiryData.id;
 
-        // Insert enquiry item record
-        if (validatedItem && validatedItem.productName && recordedEnquiryId) {
-          await (adminClient.from('enquiry_items') as any).insert({
+        // Insert enquiry item records
+        if (validatedItems.length > 0 && recordedEnquiryId) {
+          const itemInserts = validatedItems.map((item) => ({
             enquiry_id: recordedEnquiryId,
-            product_id: validatedItem.productId || null,
-            product_name: validatedItem.productName,
-            product_sku: validatedItem.sku || null,
-            product_price: validatedItem.price,
-            quantity: validatedItem.quantity,
-          });
+            product_id: item.productId || null,
+            product_name: item.productName,
+            product_sku: item.sku || null,
+            product_price: item.price,
+            quantity: item.quantity,
+          }));
+
+          await (adminClient.from('enquiry_items') as any).insert(itemInserts);
         }
       } else if (enquiryError) {
         console.warn('Enquiry database record note:', enquiryError.message);

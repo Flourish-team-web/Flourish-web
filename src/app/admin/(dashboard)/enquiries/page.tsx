@@ -5,7 +5,6 @@ import { createClient } from '@/lib/supabase/client';
 import { EnquiryStatus } from '@/types/database.types';
 import { formatCurrencyINR, formatDate } from '@/lib/utils/formatters';
 import {
-  MessageCircle,
   Phone,
   Mail,
   MapPin,
@@ -18,6 +17,7 @@ import {
   MessageSquare,
   Filter,
 } from 'lucide-react';
+import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils/cn';
 
@@ -348,7 +348,7 @@ export default function AdminEnquiriesPage() {
                         onClick={() => openWhatsApp(enquiry.customer_phone, enquiry.customer_name, firstItem?.product_name)}
                         className="flex-1 lg:flex-initial flex items-center gap-1.5 text-[11px]"
                       >
-                        <MessageCircle className="w-3.5 h-3.5" />
+                        <WhatsAppIcon className="w-3.5 h-3.5" />
                         <span>WhatsApp</span>
                       </Button>
 
