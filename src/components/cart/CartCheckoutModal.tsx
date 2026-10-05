@@ -13,26 +13,24 @@ import {
   Loader2,
   Package,
   Truck,
+  ShoppingBag,
 } from 'lucide-react';
+import { CartItem } from '@/types/store.types';
 import { formatCurrencyINR } from '@/lib/utils/formatters';
 
-interface EnquiryModalProps {
+interface CartCheckoutModalProps {
   isOpen: boolean;
   onClose: () => void;
-  quantity?: number;
-  product: {
-    id: string;
-    name: string;
-    slug?: string;
-    sku?: string | null;
-    price?: number | null;
-    fabric?: string | null;
-    images?: Array<{ image_url: string }>;
-  };
+  cartItems: CartItem[];
+  totalPrice: number;
 }
 
-export function EnquiryModal({ isOpen, onClose, product, quantity = 1 }: EnquiryModalProps) {
-  const selectedQuantity = Math.max(1, quantity);
+export function CartCheckoutModal({
+  isOpen,
+  onClose,
+  cartItems,
+  totalPrice,
+}: CartCheckoutModalProps) {
   const [formData, setFormData] = React.useState({
     name: '',
     phone: '',
@@ -82,10 +80,16 @@ export function EnquiryModal({ isOpen, onClose, product, quantity = 1 }: Enquiry
       .filter(Boolean)
       .join(', ');
 
-    const productUrl =
-      typeof window !== 'undefined' && product.slug
-        ? `${window.location.origin}/products/${product.slug}`
-        : undefined;
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+
+    const itemsPayload = cartItems.map((item) => ({
+      productId: item.productId,
+      productName: item.name,
+      sku: item.sku || null,
+      price: item.price,
+      quantity: item.quantity,
+      productUrl: item.slug ? `${origin}/products/${item.slug}` : null,
+    }));
 
     try {
       const res = await fetch('/api/enquiries', {
@@ -97,22 +101,15 @@ export function EnquiryModal({ isOpen, onClose, product, quantity = 1 }: Enquiry
           customerAddress: fullFormattedAddress,
           customerLocation: formData.city.trim() || fullFormattedAddress,
           message: formData.message.trim() || null,
-          source: 'product_whatsapp_order_form',
-          item: {
-            productId: product.id,
-            productName: product.name,
-            sku: product.sku,
-            price: product.price,
-            quantity: selectedQuantity,
-            productUrl,
-          },
+          source: 'cart_whatsapp_order_form',
+          items: itemsPayload,
         }),
       });
 
       const data = await res.json();
 
       if (!res.ok || data.error) {
-        throw new Error(data.error || 'Failed to submit order enquiry');
+        throw new Error(data.error || 'Failed to submit cart order enquiry');
       }
 
       setIsSubmitted(true);
@@ -128,7 +125,7 @@ export function EnquiryModal({ isOpen, onClose, product, quantity = 1 }: Enquiry
     }
   };
 
-  const primaryImage = product.images?.[0]?.image_url;
+  const totalPieces = cartItems.reduce((acc, i) => acc + i.quantity, 0);
 
   return (
     <Modal
@@ -138,56 +135,57 @@ export function EnquiryModal({ isOpen, onClose, product, quantity = 1 }: Enquiry
       description="Direct concierge order & personalized saree dispatch"
       className="max-w-3xl w-full bg-white border border-[#E2E8F0] shadow-2xl p-5 sm:p-7 md:p-8"
     >
-      {/* ── Product Summary Card ── */}
+      {/* ── Cart Order Summary Card ── */}
       <div className="bg-gradient-to-r from-[#F8FAFC] via-[#F1F5F9]/80 to-[#F8FAFC] border border-[#E2E8F0] rounded-2xl p-3.5 sm:p-4 mb-6 flex items-center justify-between gap-4 shadow-xs">
         <div className="flex items-center gap-3.5 min-w-0">
-          {primaryImage && (
-            <div className="relative w-16 h-20 sm:w-20 sm:h-24 rounded-xl overflow-hidden bg-[#E2E8F0] shrink-0 border border-[#CBD5E1]/60 shadow-xs">
-              <Image
-                src={primaryImage}
-                alt={product.name}
-                fill
-                sizes="(max-width: 640px) 64px, 80px"
-                className="object-cover object-top"
-              />
-            </div>
-          )}
+          {/* Thumbnails preview stack */}
+          <div className="flex -space-x-4 overflow-hidden shrink-0">
+            {cartItems.slice(0, 3).map((item, i) => (
+              <div
+                key={item.productId}
+                className="relative w-14 h-18 sm:w-16 sm:h-20 rounded-xl overflow-hidden bg-[#E2E8F0] border-2 border-white shadow-xs"
+                style={{ zIndex: 3 - i }}
+              >
+                <Image
+                  src={item.imageUrl}
+                  alt={item.name}
+                  fill
+                  sizes="64px"
+                  className="object-cover object-top"
+                />
+              </div>
+            ))}
+          </div>
+
           <div className="min-w-0">
             <span className="inline-block text-[9px] sm:text-[10px] font-sans tracking-[0.2em] text-[#0284C7] bg-[#E0F2FE]/70 border border-[#BAE6FD] px-2.5 py-0.5 rounded-md uppercase font-bold mb-1">
-              {product.fabric || 'Pure Handloom Silk'}
+              Curated Bag Checkout
             </span>
             <h4 className="font-serif text-sm sm:text-base md:text-lg text-[#0F172A] font-medium line-clamp-1 leading-snug">
-              {product.name}
+              {cartItems.length === 1
+                ? cartItems[0].name
+                : `${cartItems[0].name} + ${cartItems.length - 1} more`}
             </h4>
             <div className="flex items-center gap-2.5 mt-1.5 text-xs text-[#64748B]">
-              {product.sku && (
-                <span className="font-mono bg-[#E2E8F0] px-2 py-0.5 rounded text-[11px] font-medium text-[#334155]">
-                  #{product.sku}
-                </span>
-              )}
               <span className="flex items-center gap-1 font-medium text-[#0F172A]">
-                <Package className="w-3.5 h-3.5 text-[#0284C7]" />
-                Qty: {selectedQuantity}
+                <ShoppingBag className="w-3.5 h-3.5 text-[#0284C7]" />
+                {totalPieces} {totalPieces === 1 ? 'Saree' : 'Sarees'} ({cartItems.length} unique)
               </span>
             </div>
           </div>
         </div>
 
-        {product.price && (
-          <div className="text-right shrink-0 pl-3 border-l border-[#E2E8F0]">
-            <span className="text-[10px] uppercase tracking-wider text-[#64748B] block font-medium">
-              Total Amount
-            </span>
-            <span className="font-sans text-xl sm:text-2xl font-bold text-[#0F172A] block">
-              {formatCurrencyINR(product.price * selectedQuantity)}
-            </span>
-            {selectedQuantity > 1 && (
-              <span className="block text-[11px] text-[#64748B] font-normal mt-0.5">
-                ({formatCurrencyINR(product.price)} each)
-              </span>
-            )}
-          </div>
-        )}
+        <div className="text-right shrink-0 pl-3 border-l border-[#E2E8F0]">
+          <span className="text-[10px] uppercase tracking-wider text-[#64748B] block font-medium">
+            Total Amount
+          </span>
+          <span className="font-sans text-xl sm:text-2xl font-bold text-[#0F172A] block">
+            {formatCurrencyINR(totalPrice)}
+          </span>
+          <span className="block text-[10px] text-emerald-600 font-medium mt-0.5">
+            Free Insured Dispatch
+          </span>
+        </div>
       </div>
 
       {isSubmitted ? (
@@ -201,7 +199,7 @@ export function EnquiryModal({ isOpen, onClose, product, quantity = 1 }: Enquiry
               Order Prepared Successfully!
             </h3>
             <p className="text-xs sm:text-sm text-[#64748B] font-light leading-relaxed mt-2">
-              Your details are recorded. Click below to open WhatsApp and send your order confirmation directly to our concierge team.
+              Your bag details are recorded. Click below to open WhatsApp and send your order confirmation directly to our concierge team.
             </p>
           </div>
           {whatsappRedirectUrl && (
@@ -379,12 +377,12 @@ export function EnquiryModal({ isOpen, onClose, product, quantity = 1 }: Enquiry
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Preparing Your Order...</span>
+                  <span>Preparing Bag Order...</span>
                 </>
               ) : (
                 <>
                   <WhatsAppIcon className="w-5 h-5 text-white" />
-                  <span>Send Order to WhatsApp</span>
+                  <span>Send Bag Order to WhatsApp</span>
                 </>
               )}
             </button>

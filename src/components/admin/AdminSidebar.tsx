@@ -31,7 +31,7 @@ export const ADMIN_NAV = [
   { name: 'Hero Banners', href: '/admin/banners', icon: ImageIcon, group: 'Content' },
   { name: 'Flourish Reels', href: '/admin/reels', icon: Film, group: 'Content' },
   { name: 'Testimonials', href: '/admin/testimonials', icon: Star, group: 'Content' },
-  { name: 'Editorial Story', href: '/admin/editorial', icon: BookOpen, group: 'Content' },
+  { name: 'Flourish Edit', href: '/admin/editorial', icon: BookOpen, group: 'Content' },
   { name: 'Site Settings', href: '/admin/settings', icon: Settings, group: 'System' },
 ];
 

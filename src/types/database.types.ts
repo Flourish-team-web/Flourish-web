@@ -290,6 +290,7 @@ export interface Database {
           cta_text: string | null;
           cta_link: string | null;
           image_url: string | null;
+          image_mobile_url: string | null;
           bg_color: string | null;
           display_order: number;
           is_active: boolean;
@@ -304,6 +305,7 @@ export interface Database {
           cta_text?: string | null;
           cta_link?: string | null;
           image_url?: string | null;
+          image_mobile_url?: string | null;
           bg_color?: string | null;
           display_order?: number;
           is_active?: boolean;
@@ -317,6 +319,7 @@ export interface Database {
           cta_text?: string | null;
           cta_link?: string | null;
           image_url?: string | null;
+          image_mobile_url?: string | null;
           bg_color?: string | null;
           display_order?: number;
           is_active?: boolean;
@@ -407,6 +410,8 @@ export interface Database {
           excerpt: string | null;
           content: string;
           cover_image_url: string | null;
+          cover_image_mobile_url: string | null;
+          image_mobile_url: string | null;
           read_time: string | null;
           is_published: boolean;
           published_at: string | null;
@@ -421,6 +426,8 @@ export interface Database {
           excerpt?: string | null;
           content: string;
           cover_image_url?: string | null;
+          cover_image_mobile_url?: string | null;
+          image_mobile_url?: string | null;
           read_time?: string | null;
           is_published?: boolean;
           published_at?: string | null;
@@ -434,6 +441,8 @@ export interface Database {
           excerpt?: string | null;
           content?: string;
           cover_image_url?: string | null;
+          cover_image_mobile_url?: string | null;
+          image_mobile_url?: string | null;
           read_time?: string | null;
           is_published?: boolean;
           published_at?: string | null;

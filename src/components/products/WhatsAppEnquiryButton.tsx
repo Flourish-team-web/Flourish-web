@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { MessageCircle } from 'lucide-react';
+import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
 import { buildProductWhatsAppUrl, buildBespokeWhatsAppUrl } from '@/lib/whatsapp/urlBuilder';
 import { cn } from '@/lib/utils/cn';
 
@@ -37,7 +37,7 @@ export function WhatsAppEnquiryButton({
       })
     : buildBespokeWhatsAppUrl(undefined);
 
-  const defaultLabel = productName ? 'Enquire on WhatsApp' : 'Connect with Stylist';
+  const defaultLabel = productName ? 'Enquire on WhatsApp' : 'WhatsApp Enquiry';
 
   const variants = {
     primary: 'bg-[#071324] hover:bg-[#0E2038] text-white border border-[#38BDF8] shadow-sm hover:shadow-[0_0_15px_rgba(56,189,248,0.3)]',
@@ -64,7 +64,7 @@ export function WhatsAppEnquiryButton({
         className
       )}
     >
-      <MessageCircle className="w-4 h-4 shrink-0" />
+      <WhatsAppIcon className="w-4 h-4 shrink-0" />
       <span>{label || defaultLabel}</span>
     </a>
   );

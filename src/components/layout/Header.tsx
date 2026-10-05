@@ -4,13 +4,14 @@ import * as React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Search, Heart, ShoppingBag, Menu, MessageCircle, ChevronDown } from 'lucide-react';
+import { Search, Heart, ShoppingBag, Menu, ChevronDown } from 'lucide-react';
 import { useWishlist } from '@/hooks/useWishlist';
 import { useCart } from '@/hooks/useCart';
 import { CartDrawer } from '@/components/cart/CartDrawer';
 import { SearchModal } from './SearchModal';
 import { Drawer } from '@/components/ui/Drawer';
 import { BrandLogo, FlourishIcon } from '@/components/ui/BrandLogo';
+import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
 import { buildBespokeWhatsAppUrl } from '@/lib/whatsapp/urlBuilder';
 import { createClient } from '@/lib/supabase/client';
 import { Category } from '@/types/store.types';
@@ -260,47 +261,47 @@ export function Header() {
       <Drawer
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
-        title="Flourish Women's"
+        theme="dark"
+        title={<BrandLogo size="sm" showTagline={true} theme="dark" />}
         side="right"
       >
         <div className="flex flex-col h-full justify-between">
           <div className="space-y-6">
-            <div className="pt-2 pb-2">
-              <BrandLogo size="sm" showTagline={true} theme="light" />
-            </div>
-            <p className="text-[11px] font-sans tracking-[0.2em] text-[#0284C7] uppercase font-semibold">
+            <p className="text-[10.5px] font-sans tracking-[0.25em] text-[#38BDF8] uppercase font-bold">
               Explore Collections
             </p>
             <nav className="flex flex-col space-y-3">
               {NAV_LINKS.map((link) => {
+                const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
+
                 if (link.hasDropdown) {
                   return (
-                    <div key={link.name} className="space-y-2 border-b border-[#F1F5F9] pb-3">
+                    <div key={link.name} className="space-y-2 border-b border-[#163860]/70 pb-3">
                       <button
                         type="button"
                         onClick={() => setIsMobileCategoriesOpen(!isMobileCategoriesOpen)}
-                        className="w-full flex items-center justify-between font-serif text-lg text-[#071324] hover:text-[#0284C7] transition-colors py-1 text-left cursor-pointer"
+                        className="w-full flex items-center justify-between font-serif text-lg text-white hover:text-[#38BDF8] transition-colors py-1 text-left cursor-pointer"
                       >
-                        <span>{link.name}</span>
+                        <span className={isActive ? 'text-[#38BDF8] font-medium' : ''}>{link.name}</span>
                         <ChevronDown
                           className={cn(
-                            'w-4 h-4 transition-transform duration-200 text-[#64748B]',
-                            isMobileCategoriesOpen && 'rotate-180 text-[#0284C7]'
+                            'w-4 h-4 transition-transform duration-200 text-white/60',
+                            isMobileCategoriesOpen && 'rotate-180 text-[#38BDF8]'
                           )}
                         />
                       </button>
 
                       {/* Expandable Categories sub-list */}
                       {isMobileCategoriesOpen && (
-                        <div className="pl-3 py-1 space-y-2 border-l-2 border-[#0284C7]/30 ml-1">
+                        <div className="pl-3 py-1.5 space-y-2 border-l-2 border-[#38BDF8]/40 ml-1 bg-[#061830]/40 rounded-r-lg">
                           {categories.map((cat) => (
                             <Link
                               key={cat.id}
                               href={`/categories/${cat.slug}`}
                               onClick={() => setIsMobileMenuOpen(false)}
-                              className="flex items-center gap-2.5 text-sm text-[#475569] hover:text-[#0284C7] py-1 transition-colors"
+                              className="flex items-center gap-2.5 text-xs text-white/70 hover:text-[#38BDF8] py-1 transition-colors"
                             >
-                              <span className="w-1.5 h-1.5 rounded-full bg-[#0284C7]" />
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#38BDF8]" />
                               <span>{cat.name}</span>
                             </Link>
                           ))}
@@ -315,20 +316,26 @@ export function Header() {
                     key={link.name}
                     href={link.href}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="font-serif text-lg text-[#071324] hover:text-[#0284C7] transition-colors py-1"
+                    className={cn(
+                      'font-serif text-lg transition-colors py-1 flex items-center justify-between',
+                      isActive ? 'text-[#38BDF8] font-medium' : 'text-white/90 hover:text-[#38BDF8]'
+                    )}
                   >
-                    {link.name}
+                    <span>{link.name}</span>
+                    {isActive && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#38BDF8] shadow-[0_0_8px_#38BDF8]" />
+                    )}
                   </Link>
                 );
               })}
               <Link
                 href="/wishlist"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="font-serif text-lg text-[#071324] hover:text-[#0284C7] transition-colors flex items-center justify-between py-1"
+                className="font-serif text-lg text-white/90 hover:text-[#38BDF8] transition-colors flex items-center justify-between py-1 border-t border-[#163860]/70 pt-3"
               >
                 <span>My Wishlist</span>
                 {wishlistCount > 0 && (
-                  <span className="text-xs bg-[#38BDF8] text-[#071324] px-2 py-0.5 rounded-full font-bold">
+                  <span className="text-xs bg-[#38BDF8] text-[#051326] px-2 py-0.5 rounded-full font-bold shadow-[0_0_8px_rgba(56,189,248,0.7)]">
                     {wishlistCount}
                   </span>
                 )}
@@ -336,18 +343,18 @@ export function Header() {
             </nav>
           </div>
 
-          <div className="border-t border-[#E2E8F0] pt-6 space-y-4">
+          <div className="border-t border-[#163860] pt-6 space-y-4">
             <a
               href={buildBespokeWhatsAppUrl(undefined)}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full flex items-center justify-center gap-2 bg-[#071324] text-white py-3 text-xs uppercase tracking-widest font-medium hover:bg-[#0E2038] hover:text-[#38BDF8] transition-all rounded shadow-md"
+              className="w-full flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#25D366] to-[#128C7E] hover:from-[#20BA5A] hover:to-[#0E7A6E] text-white py-3.5 text-xs uppercase tracking-widest font-bold transition-all rounded-xl shadow-lg shadow-[#25D366]/20"
             >
-              <MessageCircle className="w-4 h-4 text-[#38BDF8]" />
-              <span>WhatsApp Stylist</span>
+              <WhatsAppIcon className="w-4 h-4 text-white" />
+              <span>WhatsApp Concierge</span>
             </a>
-            <p className="text-[11px] text-[#64748B] text-center font-light">
-              Crafted with authentic handloom traditions.
+            <p className="text-[11px] text-white/50 text-center font-light">
+              Authentic handloom heritage & direct artisan dispatch.
             </p>
           </div>
         </div>
