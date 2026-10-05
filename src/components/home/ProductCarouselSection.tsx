@@ -4,6 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import { ProductWithDetails } from '@/types/store.types';
 import { ProductCard } from '@/components/products/ProductCard';
+import { cn } from '@/lib/utils/cn';
 
 interface ProductCarouselSectionProps {
   title: string;
@@ -11,6 +12,7 @@ interface ProductCarouselSectionProps {
   subtitle?: string;
   viewAllLink?: string;
   products: ProductWithDetails[];
+  mobileLimit?: number;
 }
 
 export function ProductCarouselSection({
@@ -19,6 +21,7 @@ export function ProductCarouselSection({
   subtitle,
   viewAllLink = '/products',
   products,
+  mobileLimit,
 }: ProductCarouselSectionProps) {
   const displayProducts = products || [];
 
@@ -60,7 +63,12 @@ export function ProductCarouselSection({
         {displayProducts.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-4 lg:gap-5">
             {displayProducts.slice(0, 10).map((product, idx) => (
-              <ProductCard key={product.id} product={product} priority={idx < 5} />
+              <div
+                key={product.id}
+                className={cn(mobileLimit && idx >= mobileLimit ? 'hidden sm:block' : 'block')}
+              >
+                <ProductCard product={product} priority={idx < 5} />
+              </div>
             ))}
           </div>
         ) : (

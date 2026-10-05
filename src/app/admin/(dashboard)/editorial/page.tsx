@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { MediaUploader } from '@/components/admin/MediaUploader';
 import { slugify } from '@/lib/utils/formatters';
-import { Plus, Edit2, Trash2, CheckCircle2, XCircle, Loader2, AlertCircle } from 'lucide-react';
+import { Plus, Edit2, Trash2, CheckCircle2, XCircle, Loader2, AlertCircle, Smartphone, Monitor } from 'lucide-react';
 
 export default function AdminEditorialPage() {
   const [editorials, setEditorials] = React.useState<EditorialContent[]>([]);
@@ -24,6 +24,7 @@ export default function AdminEditorialPage() {
   const [excerpt, setExcerpt] = React.useState('');
   const [content, setContent] = React.useState('');
   const [coverImageUrl, setCoverImageUrl] = React.useState('');
+  const [coverImageMobileUrl, setCoverImageMobileUrl] = React.useState('');
   const [readTime, setReadTime] = React.useState('4 min read');
   const [isPublished, setIsPublished] = React.useState(true);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -53,6 +54,7 @@ export default function AdminEditorialPage() {
     setExcerpt('');
     setContent('');
     setCoverImageUrl('');
+    setCoverImageMobileUrl('');
     setReadTime('4 min read');
     setIsPublished(true);
     setErrorMessage(null);
@@ -67,6 +69,7 @@ export default function AdminEditorialPage() {
     setExcerpt(article.excerpt || '');
     setContent(article.content);
     setCoverImageUrl(article.cover_image_url || '');
+    setCoverImageMobileUrl((article as any).cover_image_mobile_url || (article as any).image_mobile_url || '');
     setReadTime(article.read_time || '4 min read');
     setIsPublished(article.is_published);
     setErrorMessage(null);
@@ -95,6 +98,8 @@ export default function AdminEditorialPage() {
       excerpt: excerpt.trim() || null,
       content: content.trim(),
       cover_image_url: coverImageUrl || null,
+      cover_image_mobile_url: coverImageMobileUrl || null,
+      image_mobile_url: coverImageMobileUrl || null,
       read_time: readTime.trim() || '4 min read',
       is_published: isPublished,
     };
@@ -135,9 +140,9 @@ export default function AdminEditorialPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#EAE3D2] pb-5">
         <div>
-          <h1 className="font-serif text-2xl sm:text-3xl text-[#1A1816]">Editorial & Weave Stories</h1>
+          <h1 className="font-serif text-2xl sm:text-3xl text-[#1A1816]">Flourish Edit — Editorial Stories</h1>
           <p className="text-xs text-[#706B64] font-sans mt-0.5">
-            Publish heritage textile essays, master weaver chronicles, and bridal guides.
+            Publish heritage textile essays, master weaver chronicles, and showcase stories with desktop & mobile images.
           </p>
         </div>
 
@@ -172,7 +177,12 @@ export default function AdminEditorialPage() {
                   sizes="400px"
                   className="object-cover"
                 />
-                <div className="absolute top-2 right-2">
+                <div className="absolute top-2 right-2 flex items-center gap-1">
+                  {((story as any).cover_image_mobile_url || (story as any).image_mobile_url) && (
+                    <span className="px-2 py-0.5 text-[9px] bg-[#0284C7]/90 text-white font-semibold flex items-center gap-0.5 shadow-xs">
+                      <Smartphone className="w-2.5 h-2.5" /> Mobile
+                    </span>
+                  )}
                   {story.is_published ? (
                     <span className="px-2 py-0.5 text-[9px] bg-[#EDF5F0] text-[#1B4332] font-semibold border border-[#BFDCCE]">
                       Published
@@ -237,7 +247,7 @@ export default function AdminEditorialPage() {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={editingArticle ? 'Edit Editorial Story' : 'Write Editorial Story'}
+        title={editingArticle ? 'Edit Flourish Story' : 'Write Flourish Story'}
         className="max-w-lg"
       >
         <form onSubmit={handleSave} className="space-y-4 text-xs">
@@ -299,7 +309,7 @@ export default function AdminEditorialPage() {
               Article Content *
             </label>
             <textarea
-              rows={6}
+              rows={5}
               required
               placeholder="Write the full weave story or styling essay here..."
               value={content}
@@ -308,12 +318,22 @@ export default function AdminEditorialPage() {
             />
           </div>
 
+          {/* Desktop Cover Artwork */}
           <MediaUploader
             value={coverImageUrl}
             onChange={(url) => setCoverImageUrl(url as string)}
             maxFiles={1}
             folder="flourish-woman/editorial"
-            label="Cover Artwork Photo"
+            label="Desktop Cover Artwork (16:9 Landscape)"
+          />
+
+          {/* Mobile Responsive Image Upload */}
+          <MediaUploader
+            value={coverImageMobileUrl}
+            onChange={(url) => setCoverImageMobileUrl(url as string)}
+            maxFiles={1}
+            folder="flourish-woman/editorial-mobile"
+            label="Mobile Responsive Image (Optional — 4:5 Portrait / Square)"
           />
 
           <div className="pt-2">

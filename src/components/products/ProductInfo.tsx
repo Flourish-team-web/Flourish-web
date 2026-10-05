@@ -3,7 +3,6 @@
 import * as React from 'react';
 import Link from 'next/link';
 import {
-  MessageCircle,
   ShoppingBag,
   Ruler,
   Scissors,
@@ -12,11 +11,14 @@ import {
   ShieldCheck,
   Check,
   Award,
+  Plus,
+  Minus,
 } from 'lucide-react';
 import { ProductWithDetails } from '@/types/store.types';
 import { formatCurrencyINR, calculateDiscountPercentage } from '@/lib/utils/formatters';
 import { useCart } from '@/hooks/useCart';
 import { EnquiryModal } from '@/components/products/EnquiryModal';
+import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
 import { cn } from '@/lib/utils/cn';
 
 interface ProductInfoProps {
@@ -25,6 +27,7 @@ interface ProductInfoProps {
 
 export function ProductInfo({ product }: ProductInfoProps) {
   const { addToCart } = useCart();
+  const [quantity, setQuantity] = React.useState(1);
   const [isAdded, setIsAdded] = React.useState(false);
   const [isEnquiryModalOpen, setIsEnquiryModalOpen] = React.useState(false);
 
@@ -33,6 +36,9 @@ export function ProductInfo({ product }: ProductInfoProps) {
 
   const categorySlug = product.category?.slug || (product.fabric ? product.fabric.toLowerCase().replace(/\s+/g, '-') : 'sarees');
   const categoryName = product.category?.name || product.fabric || 'Pure Silk';
+
+  const incrementQuantity = () => setQuantity((prev) => prev + 1);
+  const decrementQuantity = () => setQuantity((prev) => Math.max(1, prev - 1));
 
   const handleWhatsAppOrder = () => {
     setIsEnquiryModalOpen(true);
@@ -47,7 +53,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
       imageUrl: primaryImage,
       fabric: product.fabric,
       sku: product.sku,
-    }, 1);
+    }, quantity);
 
     setIsAdded(true);
     setTimeout(() => {
@@ -149,25 +155,40 @@ export function ProductInfo({ product }: ProductInfoProps) {
         </div>
       </div>
 
-      {/* 7. Action CTAs: ORDER ON WHATSAPP & ADD TO CART Side by Side (Placed on Top of About the Weave) */}
-      <div className="pt-2">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {/* Order on WhatsApp */}
-          <button
-            type="button"
-            onClick={handleWhatsAppOrder}
-            className="w-full bg-[#25D366] hover:bg-[#20BA5A] active:bg-[#1EBE5D] text-white border border-[#25D366] hover:border-[#20BA5A] py-3.5 px-4 rounded-xl text-xs uppercase tracking-widest font-bold transition-all shadow-md shadow-[#25D366]/25 flex items-center justify-center gap-2 cursor-pointer group"
-          >
-            <MessageCircle className="w-4 h-4 text-white fill-white group-hover:scale-110 transition-transform" />
-            <span>Order on WhatsApp</span>
-          </button>
+      {/* 7. Action CTAs */}
+      <div className="pt-2 space-y-3">
+        {/* Row 1: Quantity Selector + Add to Cart in Same Horizontal Row */}
+        <div className="flex items-center gap-2 sm:gap-3 w-full">
+          {/* Quantity Selector [ - 1 + ] */}
+          <div className="flex items-center justify-between border border-[#CBD5E1] rounded-xl bg-[#F8FAFC] p-1 shrink-0 w-28 sm:w-32 h-[46px]">
+            <button
+              type="button"
+              onClick={decrementQuantity}
+              disabled={quantity <= 1}
+              className="w-8 h-8 flex items-center justify-center text-[#475569] hover:text-[#0F172A] hover:bg-white rounded-lg transition-colors disabled:opacity-35 disabled:hover:bg-transparent cursor-pointer disabled:cursor-not-allowed"
+              aria-label="Decrease quantity"
+            >
+              <Minus className="w-3.5 h-3.5" />
+            </button>
+            <span className="text-xs sm:text-sm font-semibold text-center text-[#0F172A] select-none font-mono">
+              {quantity}
+            </span>
+            <button
+              type="button"
+              onClick={incrementQuantity}
+              className="w-8 h-8 flex items-center justify-center text-[#475569] hover:text-[#0F172A] hover:bg-white rounded-lg transition-colors cursor-pointer"
+              aria-label="Increase quantity"
+            >
+              <Plus className="w-3.5 h-3.5" />
+            </button>
+          </div>
 
           {/* Add to Cart */}
           <button
             type="button"
             onClick={handleAddToCart}
             className={cn(
-              'w-full py-3.5 px-4 rounded-xl text-xs uppercase tracking-widest font-bold transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer border',
+              'flex-1 h-[46px] px-3 sm:px-4 rounded-xl text-xs uppercase tracking-wider sm:tracking-widest font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer border min-w-0',
               isAdded
                 ? 'bg-emerald-600 border-emerald-600 text-white'
                 : 'bg-white hover:bg-[#0F172A] text-[#0F172A] hover:text-white border-[#0F172A]'
@@ -175,17 +196,27 @@ export function ProductInfo({ product }: ProductInfoProps) {
           >
             {isAdded ? (
               <>
-                <Check className="w-4 h-4 stroke-[2.5]" />
-                <span>Added to Bag</span>
+                <Check className="w-4 h-4 stroke-[2.5] shrink-0" />
+                <span className="truncate">Added ({quantity})</span>
               </>
             ) : (
               <>
-                <ShoppingBag className="w-4 h-4" />
-                <span>Add to Cart</span>
+                <ShoppingBag className="w-4 h-4 shrink-0" />
+                <span className="truncate">Add to Cart</span>
               </>
             )}
           </button>
         </div>
+
+        {/* Row 2: Order on WhatsApp Button Below Quantity & Add to Cart */}
+        <button
+          type="button"
+          onClick={handleWhatsAppOrder}
+          className="w-full bg-[#25D366] hover:bg-[#20BA5A] active:bg-[#1EBE5D] text-white border border-[#25D366] hover:border-[#20BA5A] py-3.5 px-4 rounded-xl text-xs uppercase tracking-widest font-bold transition-all shadow-md shadow-[#25D366]/25 flex items-center justify-center gap-2 cursor-pointer group"
+        >
+          <WhatsAppIcon className="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
+          <span>Order on WhatsApp</span>
+        </button>
       </div>
 
       {/* 8. About the Weave Section */}
@@ -217,6 +248,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
         isOpen={isEnquiryModalOpen}
         onClose={() => setIsEnquiryModalOpen(false)}
         product={product}
+        quantity={quantity}
       />
     </div>
   );

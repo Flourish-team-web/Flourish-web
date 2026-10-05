@@ -3,11 +3,13 @@
 import * as React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ShoppingBag, X, Trash2, Plus, Minus, MessageCircle, ShieldCheck, ArrowRight } from 'lucide-react';
+import { ShoppingBag, X, Trash2, Plus, Minus, ShieldCheck, ArrowRight } from 'lucide-react';
+import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
 import { useCart } from '@/hooks/useCart';
 import { formatCurrencyINR } from '@/lib/utils/formatters';
 import { buildBespokeWhatsAppUrl } from '@/lib/whatsapp/urlBuilder';
 import { Button } from '@/components/ui/Button';
+import { CartCheckoutModal } from '@/components/cart/CartCheckoutModal';
 import { cn } from '@/lib/utils/cn';
 
 interface CartDrawerProps {
@@ -17,11 +19,12 @@ interface CartDrawerProps {
 
 export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
   const { cartItems, updateQuantity, removeFromCart, totalCount, totalPrice, clearCart } = useCart();
+  const [isCheckoutModalOpen, setIsCheckoutModalOpen] = React.useState(false);
 
   // Close on Escape key
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape' && !isCheckoutModalOpen) onClose();
     };
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -31,29 +34,11 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
       document.body.style.overflow = '';
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, isCheckoutModalOpen]);
 
   const handleWhatsAppCheckout = () => {
     if (cartItems.length === 0) return;
-
-    let message = `*🌸 Flourish Woman — Bag Checkout Request*\n\n`;
-    message += `Hello, I would like to order the following saree(s) from my bag:\n\n`;
-
-    cartItems.forEach((item, index) => {
-      message += `*${index + 1}. ${item.name}*\n`;
-      if (item.sku) message += `• Code / SKU: ${item.sku}\n`;
-      if (item.fabric) message += `• Fabric: ${item.fabric}\n`;
-      message += `• Qty: ${item.quantity} × ${formatCurrencyINR(item.price)} = ${formatCurrencyINR(item.price * item.quantity)}\n`;
-      message += `• Link: ${typeof window !== 'undefined' ? `${window.location.origin}/products/${item.slug}` : ''}\n\n`;
-    });
-
-    message += `*Total Amount:* ${formatCurrencyINR(totalPrice)}\n\n`;
-    message += `Please confirm availability and share payment/dispatch details. Thank you!`;
-
-    const encoded = encodeURIComponent(message);
-    const targetNumber = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '919876543210').replace(/[^0-9]/g, '');
-    const waUrl = `https://wa.me/${targetNumber}?text=${encoded}`;
-    window.open(waUrl, '_blank', 'noopener,noreferrer');
+    setIsCheckoutModalOpen(true);
   };
 
   if (!isOpen) return null;
@@ -67,8 +52,8 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
       />
 
       {/* Slide-over Drawer Panel */}
-      <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-md bg-white shadow-2xl flex flex-col justify-between animate-in slide-in-from-right duration-300">
+      <div className="fixed inset-y-0 right-0 max-w-full flex pl-0 sm:pl-10">
+        <div className="w-screen max-w-full sm:max-w-md bg-white shadow-2xl flex flex-col justify-between animate-in slide-in-from-right duration-300">
           
           {/* Header */}
           <div className="p-4 sm:p-5 border-b border-[#E2E8F0] flex items-center justify-between bg-gradient-to-r from-[#030E1C] via-[#082547] to-[#041326] text-white">
@@ -113,13 +98,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                 </div>
               </div>
             ) : (
-              <>
-                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 flex items-center gap-2 text-xs text-emerald-800">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Complimentary Insured Delivery applied to your order</span>
-                </div>
-
-                <div className="divide-y divide-[#F1F5F9] space-y-3">
+              <div className="divide-y divide-[#F1F5F9] space-y-3">
                   {cartItems.map((item) => (
                     <div key={item.productId} className="pt-3 first:pt-0 flex gap-3.5 items-center">
                       <Link
@@ -191,7 +170,6 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                     </div>
                   ))}
                 </div>
-              </>
             )}
           </div>
 
@@ -205,17 +183,13 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                 </span>
               </div>
 
-              <p className="text-[10px] text-[#64748B] text-center">
-                Prices inclusive of all taxes & doorstep delivery across India.
-              </p>
-
               <button
                 type="button"
                 onClick={handleWhatsAppCheckout}
                 className="w-full bg-[#25D366] hover:bg-[#20BA5A] active:bg-[#1EBE5D] text-white border border-[#25D366] hover:border-[#20BA5A] py-3.5 px-4 rounded-xl text-xs uppercase tracking-widest font-bold transition-all shadow-md shadow-[#25D366]/25 flex items-center justify-center gap-2 cursor-pointer group"
               >
-                <MessageCircle className="w-4 h-4 text-white fill-white group-hover:scale-110 transition-transform" />
-                <span>Checkout on WhatsApp</span>
+                <WhatsAppIcon className="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
+                <span>Order on WhatsApp</span>
               </button>
 
               <button
@@ -229,6 +203,14 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
           )}
         </div>
       </div>
+
+      {/* Cart WhatsApp Checkout Modal */}
+      <CartCheckoutModal
+        isOpen={isCheckoutModalOpen}
+        onClose={() => setIsCheckoutModalOpen(false)}
+        cartItems={cartItems}
+        totalPrice={totalPrice}
+      />
     </div>
   );
 }

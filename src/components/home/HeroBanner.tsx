@@ -29,34 +29,26 @@ const DEFAULT_BANNERS = [
 
 export function HeroBanner({ banners }: HeroBannerProps) {
   const [currentIndex, setCurrentIndex] = React.useState(0);
-  const [isAnimating, setIsAnimating] = React.useState(false);
 
   const activeBanners = banners && banners.length > 0 ? banners : DEFAULT_BANNERS;
 
-  // Auto-advance
+  // Auto-advance continuous loop
   React.useEffect(() => {
     if (activeBanners.length <= 1) return;
     const timer = setInterval(() => {
-      goTo((prev) => (prev < activeBanners.length - 1 ? prev + 1 : 0));
-    }, 6000);
+      setCurrentIndex((prev) => (prev + 1) % activeBanners.length);
+    }, 5000);
     return () => clearInterval(timer);
   }, [activeBanners.length]);
 
-  const goTo = (indexOrFn: number | ((prev: number) => number)) => {
-    if (isAnimating) return;
-    setIsAnimating(true);
-    setCurrentIndex(typeof indexOrFn === 'function' ? indexOrFn(currentIndex) : indexOrFn);
-    setTimeout(() => setIsAnimating(false), 600);
-  };
-
   const handlePrev = (e?: React.MouseEvent) => {
     e?.stopPropagation();
-    goTo((prev) => (prev > 0 ? prev - 1 : activeBanners.length - 1));
+    setCurrentIndex((prev) => (prev > 0 ? prev - 1 : activeBanners.length - 1));
   };
 
   const handleNext = (e?: React.MouseEvent) => {
     e?.stopPropagation();
-    goTo((prev) => (prev < activeBanners.length - 1 ? prev + 1 : 0));
+    setCurrentIndex((prev) => (prev + 1) % activeBanners.length);
   };
 
   const current = activeBanners[currentIndex] || activeBanners[0];
@@ -151,13 +143,6 @@ export function HeroBanner({ banners }: HeroBannerProps) {
           >
             <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
-
-          {/* Slide Indicator on bottom left */}
-          <div className="absolute bottom-5 sm:bottom-10 left-4 sm:left-8 md:left-16 z-30 flex items-center gap-2 text-white/80 text-[10px] sm:text-xs font-mono tracking-widest bg-black/40 backdrop-blur-md px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full border border-white/20">
-            <span>0{currentIndex + 1}</span>
-            <span className="text-white/40">/</span>
-            <span>0{activeBanners.length}</span>
-          </div>
         </>
       )}
     </section>

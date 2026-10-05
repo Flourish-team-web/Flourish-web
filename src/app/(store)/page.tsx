@@ -79,6 +79,7 @@ export default async function HomePage() {
             subtitle="Timeless classics chosen by our styling team"
             viewAllLink="/products?sort=featured"
             products={featuredProducts}
+            mobileLimit={8}
           />
         )}
 
