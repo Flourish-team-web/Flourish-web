@@ -131,7 +131,7 @@ export function ReelsSection({ reels }: ReelsSectionProps) {
     <section className="py-8 sm:py-12 bg-white border-b border-[#EAE3D2] overflow-hidden">
       <div className="container mx-auto px-4 sm:px-8 md:px-12 lg:px-20 xl:px-24">
         {/* Section Header */}
-        <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 mb-6 sm:mb-8">
+        <div className="flex items-center justify-between gap-3 mb-6 sm:mb-8">
           <div className="flex items-center gap-2.5 sm:gap-4">
             <h2 className="font-serif text-xl sm:text-2xl md:text-3xl text-[#0F1C2E] font-medium tracking-tight">
               Flourish Reels
@@ -141,13 +141,6 @@ export function ReelsSection({ reels }: ReelsSectionProps) {
               Real Women, Real Stories, Real Sarees.
             </span>
           </div>
-          <Link
-            href="/products"
-            className="text-[11px] sm:text-xs uppercase tracking-widest text-[#0F1C2E] font-semibold hover:text-[#0284C7] transition-colors flex items-center gap-1.5 shrink-0"
-          >
-            <span>View All Reels</span>
-            <span className="text-sm">→</span>
-          </Link>
         </div>
 
         {/* ================================================================================================== */}
