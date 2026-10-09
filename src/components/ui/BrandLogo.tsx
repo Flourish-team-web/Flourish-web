@@ -112,10 +112,11 @@ export function FlourishIcon({
 }
 
 /**
- * Official Brand Logo Component — renders the official /images/flourish-logo.png asset
+ * Official Brand Logo Component — renders the official /images/logo.png asset with dark/light theme support
  */
 export function BrandLogo({
   size = 'md',
+  theme = 'light',
   asLink = true,
   className,
   imageClassName,
@@ -124,11 +125,13 @@ export function BrandLogo({
   // Height presets for the official rectangular logo asset
   const sizeMap = {
     xs: { height: 40, width: 120, className: 'h-7 sm:h-8 w-auto' },
-    sm: { height: 56, width: 168, className: 'h-8 sm:h-10 md:h-12 w-auto' },
+    sm: { height: 56, width: 168, className: 'h-8 sm:h-10 md:h-11 w-auto' },
     md: { height: 80, width: 240, className: 'h-8 sm:h-10 md:h-12 lg:h-14 w-auto' },
     lg: { height: 104, width: 312, className: 'h-12 sm:h-16 md:h-20 w-auto' },
     xl: { height: 140, width: 420, className: 'h-16 sm:h-22 md:h-28 w-auto' },
   }[size];
+
+  const isDark = theme === 'dark';
 
   const content = (
     <div className={cn('relative inline-flex items-center select-none bg-transparent max-w-full', className)}>
@@ -138,7 +141,12 @@ export function BrandLogo({
         width={sizeMap.width * 2}
         height={sizeMap.height * 2}
         priority={priority}
-        className={cn('object-contain bg-transparent max-w-full', sizeMap.className, imageClassName)}
+        className={cn(
+          'object-contain bg-transparent max-w-full transition-all',
+          sizeMap.className,
+          isDark && 'brightness-0 invert drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]',
+          imageClassName
+        )}
       />
     </div>
   );
