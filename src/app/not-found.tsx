@@ -9,9 +9,7 @@ export default function NotFound() {
     <div className="min-h-screen bg-gradient-to-b from-[#06182E] via-[#041021] to-[#01060E] text-[#F8FAFC] flex flex-col justify-between selection:bg-[#38BDF8] selection:text-[#071324]">
       {/* Top Header Bar */}
       <header className="py-6 px-6 sm:px-12 border-b border-[#163860]/50 flex items-center justify-between">
-        <Link href="/" className="inline-block">
-          <BrandLogo size="md" showTagline={false} theme="dark" />
-        </Link>
+        <BrandLogo size="md" showTagline={false} theme="dark" asLink={true} />
         <Link
           href="/"
           className="text-xs uppercase tracking-widest text-[#94A3B8] hover:text-[#38BDF8] transition-colors flex items-center gap-1.5"

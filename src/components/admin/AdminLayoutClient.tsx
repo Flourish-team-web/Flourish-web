@@ -75,23 +75,24 @@ export function AdminLayoutClient({ userEmail, children }: AdminLayoutClientProp
         onOpenSignOut={handleOpenSignOutModal}
       />
 
-      <div className="flex flex-1 overflow-hidden relative">
-        {/* 2. Sidebar (Persistent on desktop, Right slide-out drawer on mobile) */}
+      {/* 2. Main Body: Fixed Left Sidebar + Right Scrollable Page */}
+      <div className="flex flex-1 relative">
+        {/* Persistent Left Sidebar */}
         <AdminSidebar
           isMobileOpen={isMobileSidebarOpen}
           onClose={handleCloseMobileMenu}
           onOpenSignOut={handleOpenSignOutModal}
         />
 
-        {/* 3. Main content area */}
-        <main className="flex-1 overflow-y-auto w-full pb-20 lg:pb-0">
-          <div className="p-3.5 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full min-h-full">
+        {/* Right side page content - Standard Window / Page Scrolling */}
+        <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8 pb-24 lg:pb-12">
+          <div className="max-w-7xl mx-auto w-full">
             {children}
           </div>
         </main>
       </div>
 
-      {/* 4. Mobile Bottom Quick Navigation Bar (< lg screens) */}
+      {/* 3. Mobile Bottom Quick Navigation Bar (< lg screens) */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#071324]/95 backdrop-blur-md border-t border-[#1a3a5c] px-2 py-1.5 shadow-2xl">
         <div className="flex items-center justify-around">
           {mobileBottomNavItems.map((item) => {
@@ -148,7 +149,7 @@ export function AdminLayoutClient({ userEmail, children }: AdminLayoutClientProp
         </div>
       </nav>
 
-      {/* 5. Sign Out Confirmation Modal (Desktop & Mobile) */}
+      {/* 4. Sign Out Confirmation Modal */}
       <Modal
         isOpen={isSignOutModalOpen}
         onClose={() => !isSigningOut && setIsSignOutModalOpen(false)}
