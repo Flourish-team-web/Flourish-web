@@ -2,7 +2,7 @@ import * as React from 'react';
 import { HeroBanner } from '@/components/home/HeroBanner';
 import { ReelsSection } from '@/components/home/ReelsSection';
 import { CollectionCircleList } from '@/components/home/CollectionCircleList';
-import { EditorialSpotlight } from '@/components/home/EditorialSpotlight';
+import { FlourishSignature } from '@/components/home/FlourishSignature';
 import { ProductCarouselSection } from '@/components/home/ProductCarouselSection';
 import { BrandHeritage } from '@/components/home/BrandHeritage';
 import { TestimonialsSection } from '@/components/home/TestimonialsSection';
@@ -59,8 +59,8 @@ export default async function HomePage() {
         {/* 3. Shop by Collection (circles) */}
         <CollectionCircleList categories={categories} />
 
-        {/* 4. The Flourish Edit (3-column promotional banners - showcase without redirects) */}
-        <EditorialSpotlight banners={promotionalBanners} />
+        {/* 4. The Flourish Signature (3 small signature promotional banners) */}
+        <FlourishSignature banners={promotionalBanners} />
 
         {/* 5. New Arrivals */}
         <ProductCarouselSection

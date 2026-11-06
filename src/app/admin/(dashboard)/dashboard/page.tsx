@@ -20,6 +20,7 @@ import {
   ExternalLink,
   ShieldCheck,
   ShoppingBag,
+  Sparkles,
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -173,12 +174,12 @@ export default async function AdminDashboardPage() {
       bg: 'bg-amber-50 hover:bg-amber-100/70 border-amber-200',
     },
     {
-      title: 'Flourish Edit',
-      desc: 'Editorial articles',
-      href: '/admin/editorial',
-      icon: BookOpen,
-      color: 'text-pink-500',
-      bg: 'bg-pink-50 hover:bg-pink-100/70 border-pink-200',
+      title: 'Promo Banners',
+      desc: 'Flourish Signature',
+      href: '/admin/promo-banners',
+      icon: Sparkles,
+      color: 'text-amber-500',
+      bg: 'bg-amber-50 hover:bg-amber-100/70 border-amber-200',
     },
   ];
 
