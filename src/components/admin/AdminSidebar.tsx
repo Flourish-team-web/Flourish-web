@@ -18,6 +18,7 @@ import {
   ChevronRight,
   X,
   LogOut,
+  Sparkles,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { BrandLogo } from '@/components/ui/BrandLogo';
@@ -29,9 +30,9 @@ export const ADMIN_NAV = [
   { name: 'Collections', href: '/admin/collections', icon: FolderKanban, group: 'Catalog' },
   { name: 'Enquiries', href: '/admin/enquiries', icon: MessageSquare, group: 'CRM' },
   { name: 'Hero Banners', href: '/admin/banners', icon: ImageIcon, group: 'Content' },
+  { name: 'Promo Banners', href: '/admin/promo-banners', icon: Sparkles, group: 'Content' },
   { name: 'Flourish Reels', href: '/admin/reels', icon: Film, group: 'Content' },
   { name: 'Testimonials', href: '/admin/testimonials', icon: Star, group: 'Content' },
-  { name: 'Flourish Edit', href: '/admin/editorial', icon: BookOpen, group: 'Content' },
   { name: 'Site Settings', href: '/admin/settings', icon: Settings, group: 'System' },
 ];
 
