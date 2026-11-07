@@ -8,8 +8,11 @@ import { Button } from '@/components/ui/Button';
 import { Phone, Mail, MapPin, CheckCircle2 } from 'lucide-react';
 import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
 import { buildBespokeWhatsAppUrl } from '@/lib/whatsapp/urlBuilder';
+import { createClient } from '@/lib/supabase/client';
+import { SiteSettings } from '@/types/store.types';
 
 export default function ContactPage() {
+  const [settings, setSettings] = React.useState<SiteSettings | null>(null);
   const [formData, setFormData] = React.useState({
     name: '',
     phone: '',
@@ -20,6 +23,23 @@ export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isSuccess, setIsSuccess] = React.useState(false);
   const [error, setError] = React.useState('');
+
+  React.useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from('site_settings')
+          .select('*')
+          .eq('id', 'global')
+          .single();
+        if (!error && data) {
+          setSettings(data as SiteSettings);
+        }
+      } catch {}
+    };
+    fetchSettings();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -199,7 +219,12 @@ export default function ContactPage() {
                 <div className="flex items-start gap-3">
                   <Phone className="w-4 h-4 text-[#C5A059] shrink-0 mt-0.5" />
                   <div>
-                    <span className="text-[#1A1816] font-medium block">+91 98765 43210</span>
+                    <a
+                      href={`tel:${(settings?.contact_phone || settings?.whatsapp_number || '+91 62350 35705').replace(/[^0-9+]/g, '')}`}
+                      className="text-[#1A1816] font-medium block hover:underline"
+                    >
+                      {settings?.contact_phone || settings?.whatsapp_number || '+91 62350 35705'}
+                    </a>
                     <span className="text-[11px] text-[#8F8A80]">Mon – Sat: 10:00 AM – 7:00 PM IST</span>
                   </div>
                 </div>
@@ -207,7 +232,12 @@ export default function ContactPage() {
                 <div className="flex items-start gap-3">
                   <Mail className="w-4 h-4 text-[#C5A059] shrink-0 mt-0.5" />
                   <div>
-                    <span className="text-[#1A1816] font-medium block">concierge@flourishwoman.com</span>
+                    <a
+                      href={`mailto:${settings?.contact_email || 'concierge@flourishwomen.com'}`}
+                      className="text-[#1A1816] font-medium block hover:underline"
+                    >
+                      {settings?.contact_email || 'concierge@flourishwomen.com'}
+                    </a>
                     <span className="text-[11px] text-[#8F8A80]">We respond within 24 business hours</span>
                   </div>
                 </div>
@@ -215,7 +245,9 @@ export default function ContactPage() {
                 <div className="flex items-start gap-3">
                   <MapPin className="w-4 h-4 text-[#C5A059] shrink-0 mt-0.5" />
                   <div>
-                    <span className="text-[#1A1816] font-medium block">Flourish Woman Studio</span>
+                    <span className="text-[#1A1816] font-medium block whitespace-pre-line">
+                      {settings?.address || 'Flourish Studio, Kanchipuram & Chennai, Tamil Nadu, India'}
+                    </span>
                     <span className="text-[11px] text-[#8F8A80]">India — Global Insured Dispatch</span>
                   </div>
                 </div>
