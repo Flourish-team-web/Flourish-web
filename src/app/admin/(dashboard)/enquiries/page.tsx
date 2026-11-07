@@ -20,6 +20,7 @@ import {
 import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils/cn';
+import { ConfirmDeleteModal } from '@/components/admin/ConfirmDeleteModal';
 
 interface EnquiryWithItems {
   id: string;
@@ -120,11 +121,19 @@ export default function AdminEnquiriesPage() {
     setEnquiries(enquiries.map((e) => (e.id === id ? { ...e, status: newStatus } : e)));
   };
 
-  const handleDelete = async (id: string, name: string) => {
-    if (!window.confirm(`Delete enquiry from "${name}"?`)) return;
+  const [deleteTarget, setDeleteTarget] = React.useState<{ id: string; name: string } | null>(null);
+  const [isDeleting, setIsDeleting] = React.useState(false);
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
     const supabase = createClient();
-    const { error } = await supabase.from('enquiries').delete().eq('id', id);
-    if (!error) setEnquiries(enquiries.filter((e) => e.id !== id));
+    const { error } = await supabase.from('enquiries').delete().eq('id', deleteTarget.id);
+    if (!error) {
+      setEnquiries((prev) => prev.filter((e) => e.id !== deleteTarget.id));
+      setDeleteTarget(null);
+    }
+    setIsDeleting(false);
   };
 
   const openWhatsApp = (phone: string, name: string, product?: string) => {
@@ -353,7 +362,7 @@ export default function AdminEnquiriesPage() {
                       </Button>
 
                       <button
-                        onClick={() => handleDelete(enquiry.id, enquiry.customer_name)}
+                        onClick={() => setDeleteTarget({ id: enquiry.id, name: enquiry.customer_name })}
                         className="p-2 rounded-xl text-[#94A3B8] hover:text-rose-500 hover:bg-rose-50 transition-colors cursor-pointer border border-transparent hover:border-rose-200"
                         title="Delete"
                       >
@@ -379,6 +388,15 @@ export default function AdminEnquiriesPage() {
           </p>
         </div>
       )}
+      {/* Delete Confirmation Modal */}
+      <ConfirmDeleteModal
+        isOpen={Boolean(deleteTarget)}
+        onClose={() => !isDeleting && setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+        itemType="enquiry"
+        itemName={deleteTarget?.name}
+        isDeleting={isDeleting}
+      />
     </div>
   );
 }

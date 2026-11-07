@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingBag, Trash2, Plus, Minus, ShieldCheck, ArrowRight, Sparkles, Award } from 'lucide-react';
+import { ShoppingBag, Trash2, Plus, Minus, ShieldCheck, ArrowRight, BadgeCheck, Award } from 'lucide-react';
 import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
 import { useCart } from '@/hooks/useCart';
 import { formatCurrencyINR } from '@/lib/utils/formatters';
@@ -70,7 +70,7 @@ export default function CartPage() {
               {/* Delivery info banner */}
               <div className="bg-emerald-50/80 border border-emerald-200 rounded-xl p-3 sm:p-3.5 flex items-center gap-2.5 text-xs text-emerald-900">
                 <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span className="font-medium">Complimentary Insured Delivery & Silk Mark Guarantee applied to all items.</span>
+                <span className="font-medium">Direct Weaver Heritage & Silk Mark Guarantee applied to all items.</span>
               </div>
 
               {/* Items */}
@@ -183,8 +183,8 @@ export default function CartPage() {
                     <span className="font-medium text-[#0F172A]">{formatCurrencyINR(totalPrice)}</span>
                   </div>
                   <div className="flex justify-between text-[#64748B]">
-                    <span>Insured Shipping (India)</span>
-                    <span className="text-emerald-600 font-semibold uppercase">Free</span>
+                    <span>Shipping Fee</span>
+                    <span className="text-[#0F172A] font-semibold text-[11px]">Extra (At Actuals)</span>
                   </div>
                   <div className="flex justify-between text-[#64748B]">
                     <span>Authenticity Certificate</span>
@@ -233,7 +233,7 @@ export default function CartPage() {
                   <span>Direct Artisan Handcraft & Safe Delivery</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-3.5 h-3.5 text-[#0284C7] shrink-0" />
+                  <BadgeCheck className="w-3.5 h-3.5 text-[#0284C7] shrink-0" />
                   <span>Personalized Concierge & Fall/Pico Support</span>
                 </div>
               </div>

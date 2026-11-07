@@ -20,13 +20,14 @@ import {
   Smartphone,
   Monitor,
   ArrowRight,
-  Sparkles,
+  BadgePercent,
   ExternalLink,
   Layers,
   Image as ImageIcon,
   Link2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
+import { ConfirmDeleteModal } from '@/components/admin/ConfirmDeleteModal';
 
 export default function AdminPromoBannersPage() {
   const [banners, setBanners] = React.useState<PromotionalBanner[]>([]);
@@ -231,16 +232,22 @@ export default function AdminPromoBannersPage() {
     );
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this promotional banner?')) return;
+  const [deleteTarget, setDeleteTarget] = React.useState<{ id: string; title: string } | null>(null);
+  const [isDeleting, setIsDeleting] = React.useState(false);
 
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+
+    setIsDeleting(true);
     const supabase = createClient();
-    const { error } = await supabase.from('promotional_banners').delete().eq('id', id);
+    const { error } = await supabase.from('promotional_banners').delete().eq('id', deleteTarget.id);
     if (!error) {
-      setBanners(banners.filter((b) => b.id !== id));
+      setBanners((prev) => prev.filter((b) => b.id !== deleteTarget.id));
+      setDeleteTarget(null);
     } else {
       alert('Error deleting banner: ' + error.message);
     }
+    setIsDeleting(false);
   };
 
   return (
@@ -249,7 +256,7 @@ export default function AdminPromoBannersPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-[#E2E8F0] rounded-2xl p-5 shadow-xs">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Sparkles className="w-4 h-4 text-[#0284C7]" />
+            <BadgePercent className="w-4 h-4 text-[#0284C7]" />
             <span className="text-[10px] uppercase tracking-widest text-[#0284C7] font-bold">
               The Flourish Signature
             </span>
@@ -273,7 +280,7 @@ export default function AdminPromoBannersPage() {
 
       {/* Notice info pill */}
       <div className="bg-[#E0F2FE]/60 border border-[#BAE6FD] rounded-xl p-3.5 flex items-start gap-2.5 text-xs text-[#0369A1]">
-        <Sparkles className="w-4 h-4 text-[#0284C7] shrink-0 mt-0.5" />
+        <BadgePercent className="w-4 h-4 text-[#0284C7] shrink-0 mt-0.5" />
         <p className="leading-relaxed">
           The top <strong>3 active banners</strong> will automatically showcase in <strong>&quot;The Flourish Signature&quot;</strong> section. Dedicated mobile responsive images automatically adapt on phones and tablets.
         </p>
@@ -393,7 +400,7 @@ export default function AdminPromoBannersPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleDelete(banner.id)}
+                  onClick={() => setDeleteTarget({ id: banner.id, title: banner.title || 'Promo Banner' })}
                   className="text-xs py-1.5 h-8 text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-200 flex items-center justify-center px-2.5"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
@@ -404,7 +411,7 @@ export default function AdminPromoBannersPage() {
         </div>
       ) : (
         <div className="bg-white border border-[#E2E8F0] rounded-2xl p-12 text-center shadow-xs">
-          <Sparkles className="w-10 h-10 text-[#94A3B8] mx-auto mb-3" />
+          <BadgePercent className="w-10 h-10 text-[#94A3B8] mx-auto mb-3" />
           <h3 className="font-serif text-lg text-[#0F172A] font-medium">No Signature Promo Banners Yet</h3>
           <p className="text-xs text-[#64748B] mt-1 max-w-sm mx-auto">
             Create signature promo banners with custom desktop and mobile imagery to feature them on the homepage.
@@ -787,6 +794,16 @@ export default function AdminPromoBannersPage() {
           </div>
         </form>
       </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmDeleteModal
+        isOpen={Boolean(deleteTarget)}
+        onClose={() => !isDeleting && setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+        itemType="promotional banner"
+        itemName={deleteTarget?.title}
+        isDeleting={isDeleting}
+      />
     </div>
   );
 }

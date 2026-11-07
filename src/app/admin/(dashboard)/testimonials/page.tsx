@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { MediaUploader } from '@/components/admin/MediaUploader';
 import { Plus, Edit2, Trash2, Star, Loader2, AlertCircle } from 'lucide-react';
+import { ConfirmDeleteModal } from '@/components/admin/ConfirmDeleteModal';
 
 export default function AdminTestimonialsPage() {
   const [testimonials, setTestimonials] = React.useState<Testimonial[]>([]);
@@ -112,16 +113,22 @@ export default function AdminTestimonialsPage() {
     }
   };
 
-  const handleDelete = async (id: string, name: string) => {
-    if (!window.confirm(`Are you sure you want to delete review from "${name}"?`)) return;
+  const [deleteTarget, setDeleteTarget] = React.useState<{ id: string; name: string } | null>(null);
+  const [isDeleting, setIsDeleting] = React.useState(false);
 
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+
+    setIsDeleting(true);
     const supabase = createClient();
-    const { error } = await supabase.from('testimonials').delete().eq('id', id);
+    const { error } = await supabase.from('testimonials').delete().eq('id', deleteTarget.id);
     if (!error) {
-      setTestimonials(testimonials.filter((t) => t.id !== id));
+      setTestimonials((prev) => prev.filter((t) => t.id !== deleteTarget.id));
+      setDeleteTarget(null);
     } else {
       alert('Error deleting testimonial: ' + error.message);
     }
+    setIsDeleting(false);
   };
 
   return (
@@ -197,7 +204,7 @@ export default function AdminTestimonialsPage() {
                     <Edit2 className="w-3.5 h-3.5" />
                   </button>
                   <button
-                    onClick={() => handleDelete(t.id, t.client_name)}
+                    onClick={() => setDeleteTarget({ id: t.id, name: t.client_name || 'Review' })}
                     className="p-1 text-[#706B64] hover:text-red-600 transition-colors cursor-pointer"
                     title="Delete Review"
                   >
@@ -337,6 +344,16 @@ export default function AdminTestimonialsPage() {
           </div>
         </form>
       </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmDeleteModal
+        isOpen={Boolean(deleteTarget)}
+        onClose={() => !isDeleting && setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+        itemType="testimonial"
+        itemName={deleteTarget?.name}
+        isDeleting={isDeleting}
+      />
     </div>
   );
 }
