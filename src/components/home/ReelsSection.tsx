@@ -7,6 +7,14 @@ import { Reel } from '@/types/store.types';
 import { cn } from '@/lib/utils/cn';
 
 // High-quality placeholder reels if database items are empty or fewer
+const isVisibleTitle = (title?: string | null): boolean => {
+  if (!title) return false;
+  const trimmed = title.trim();
+  if (!trimmed) return false;
+  const lower = trimmed.toLowerCase();
+  return lower !== 'flourish reel' && lower !== 'untitled reel';
+};
+
 const PLACEHOLDER_REELS = [
   {
     id: 'r1',
@@ -531,17 +539,21 @@ export function ReelsSection({ reels }: ReelsSectionProps) {
                 </div>
               )}
 
-              {/* Bottom Card Title & Views */}
-              <div className="absolute bottom-0 left-0 right-0 p-3.5 bg-gradient-to-t from-black/85 via-black/40 to-transparent text-white space-y-0.5 pointer-events-none z-20">
-                <h4 className="font-sans text-xs sm:text-sm font-semibold text-white leading-tight drop-shadow-sm line-clamp-2">
-                  {centerReel.title}
-                </h4>
-                {centerReel.view_count_label && (
-                  <p className="text-[10px] text-white/80 font-normal">
-                    {centerReel.view_count_label}
-                  </p>
-                )}
-              </div>
+              {/* Bottom Card Title & Views (Only show if custom title or views present) */}
+              {(isVisibleTitle(centerReel.title) || centerReel.view_count_label) && (
+                <div className="absolute bottom-0 left-0 right-0 p-3.5 bg-gradient-to-t from-black/85 via-black/40 to-transparent text-white space-y-0.5 pointer-events-none z-20">
+                  {isVisibleTitle(centerReel.title) && (
+                    <h4 className="font-sans text-xs sm:text-sm font-semibold text-white leading-tight drop-shadow-sm line-clamp-2">
+                      {centerReel.title}
+                    </h4>
+                  )}
+                  {centerReel.view_count_label && (
+                    <p className="text-[10px] text-white/80 font-normal">
+                      {centerReel.view_count_label}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* 3. RIGHT CARD (Showing left ~45% half, scaled down) */}
@@ -678,17 +690,21 @@ export function ReelsSection({ reels }: ReelsSectionProps) {
                   </div>
                 )}
 
-                {/* Bottom Card Title & Views */}
-                <div className="absolute bottom-0 left-0 right-0 p-3.5 bg-gradient-to-t from-black/85 via-black/40 to-transparent text-white space-y-0.5 pointer-events-none z-20">
-                  <h4 className="font-sans text-xs sm:text-sm font-semibold text-white leading-tight drop-shadow-sm line-clamp-2">
-                    {reel.title}
-                  </h4>
-                  {reel.view_count_label && (
-                    <p className="text-[10px] sm:text-[11px] text-white/80 font-normal">
-                      {reel.view_count_label}
-                    </p>
-                  )}
-                </div>
+                {/* Bottom Card Title & Views (Only show if custom title or views present) */}
+                {(isVisibleTitle(reel.title) || reel.view_count_label) && (
+                  <div className="absolute bottom-0 left-0 right-0 p-3.5 bg-gradient-to-t from-black/85 via-black/40 to-transparent text-white space-y-0.5 pointer-events-none z-20">
+                    {isVisibleTitle(reel.title) && (
+                      <h4 className="font-sans text-xs sm:text-sm font-semibold text-white leading-tight drop-shadow-sm line-clamp-2">
+                        {reel.title}
+                      </h4>
+                    )}
+                    {reel.view_count_label && (
+                      <p className="text-[10px] sm:text-[11px] text-white/80 font-normal">
+                        {reel.view_count_label}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             );
           })}

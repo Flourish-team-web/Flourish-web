@@ -55,7 +55,9 @@ export default function AdminReelsPage() {
 
   const openEditModal = (reel: Reel) => {
     setEditingReel(reel);
-    setTitle(reel.title);
+    const existingTitle = (reel.title || '').trim();
+    // Do not show 'Flourish Reel' if it was auto-filled previously
+    setTitle(existingTitle.toLowerCase() === 'flourish reel' ? '' : existingTitle);
     setVideoUrl(reel.video_url || '');
     setThumbnailUrl(reel.thumbnail_url);
     setDisplayOrder(reel.display_order.toString());
@@ -71,7 +73,7 @@ export default function AdminReelsPage() {
     const supabase = createClient();
 
     const payload = {
-      title: title.trim() || 'Flourish Reel',
+      title: title.trim(),
       video_url: videoUrl.trim() || null,
       thumbnail_url: thumbnailUrl.trim() || '/images/placeholder-saree.svg',
       view_count_label: editingReel ? editingReel.view_count_label : null,
@@ -187,7 +189,9 @@ export default function AdminReelsPage() {
 
               <div className="p-3 space-y-1">
                 <h4 className="font-serif text-xs text-[#1A1816] font-medium line-clamp-2 leading-tight">
-                  {reel.title}
+                  {reel.title?.trim() && reel.title.trim().toLowerCase() !== 'flourish reel'
+                    ? reel.title
+                    : 'Reel (No Title)'}
                 </h4>
               </div>
 
