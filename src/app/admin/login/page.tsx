@@ -5,7 +5,7 @@ import { Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
-import { Shield, AlertCircle, ArrowLeft, Mail, Lock, Eye, EyeOff, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Shield, AlertCircle, ArrowLeft, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 
 import { BrandLogo } from '@/components/ui/BrandLogo';
 
@@ -199,16 +199,6 @@ function AdminLoginForm() {
             </button>
           </div>
         </form>
-
-        {/* Credentials Info Helper */}
-        <div className="mt-6 pt-5 border-t border-[#234573]/80">
-          <div className="flex items-start gap-2.5 text-[11px] text-[#94A3B8] bg-[#071324]/60 p-3 rounded-lg border border-[#162E52]">
-            <CheckCircle2 className="w-4 h-4 text-[#38BDF8] shrink-0 mt-0.5" />
-            <p className="leading-relaxed">
-              Managed via <span className="text-white font-medium">Supabase Auth</span>. You can create or edit your admin login under your Supabase Project Authentication tab.
-            </p>
-          </div>
-        </div>
       </div>
 
       {/* Footer link */}

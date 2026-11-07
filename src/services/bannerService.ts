@@ -148,7 +148,17 @@ export async function getFeaturedTestimonials(): Promise<Testimonial[]> {
       .eq('is_featured', true)
       .order('display_order', { ascending: true });
 
-    if (!error && data && data.length > 0) return data;
+    if (!error && data && data.length > 0) {
+      const items = (data as unknown as Testimonial[]);
+      // Deduplicate by client_name + content so each patron review appears only once
+      const seen = new Set<string>();
+      return items.filter((item) => {
+        const key = `${(item.client_name || '').trim().toLowerCase()}:::${(item.content || '').trim().toLowerCase()}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    }
   } catch (err) {
     console.warn('Testimonials fallback used:', err);
   }

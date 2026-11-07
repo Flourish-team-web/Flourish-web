@@ -25,6 +25,7 @@ import {
   Layers,
   Image as ImageIcon,
   Link2,
+  Compass,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { ConfirmDeleteModal } from '@/components/admin/ConfirmDeleteModal';
@@ -43,7 +44,7 @@ export default function AdminPromoBannersPage() {
   const [badgeText, setBadgeText] = React.useState('');
   const [ctaText, setCtaText] = React.useState('Explore Collection');
   const [ctaLink, setCtaLink] = React.useState('/products');
-  const [selectedDestinationType, setSelectedDestinationType] = React.useState<'preset' | 'custom'>('preset');
+  const [selectedDestinationType, setSelectedDestinationType] = React.useState<'category' | 'page' | 'custom'>('category');
   const [imageUrl, setImageUrl] = React.useState('');
   const [imageMobileUrl, setImageMobileUrl] = React.useState('');
   const [displayOrder, setDisplayOrder] = React.useState('0');
@@ -86,8 +87,12 @@ export default function AdminPromoBannersPage() {
     setSubtitle('');
     setBadgeText('');
     setCtaText('Explore Collection');
-    setCtaLink('/products');
-    setSelectedDestinationType('preset');
+    setSelectedDestinationType('category');
+    if (categories.length > 0) {
+      setCtaLink(`/categories/${categories[0].slug}`);
+    } else {
+      setCtaLink('/products');
+    }
     setImageUrl('');
     setImageMobileUrl('');
     setDesktopImageMode('upload');
@@ -104,19 +109,26 @@ export default function AdminPromoBannersPage() {
     setSubtitle(banner.subtitle || '');
     setBadgeText(banner.badge_text || '');
     setCtaText(banner.cta_text || 'Explore Collection');
-    const link = banner.cta_link || '/products';
+    const link = banner.cta_link || '';
     setCtaLink(link);
 
-    const knownPresets = [
-      '/products',
-      '/products?sort=newest',
-      '/products?sort=popular',
-      '/products?sort=featured',
-      ...categories.map((c) => `/categories/${c.slug}`),
-      ...collections.map((c) => `/collections/${c.slug}`),
-    ];
-    if (knownPresets.includes(link)) {
-      setSelectedDestinationType('preset');
+    if (link.startsWith('/categories/')) {
+      setSelectedDestinationType('category');
+    } else if (
+      [
+        '/products',
+        '/products?filter=new-arrivals',
+        '/products?sort=newest',
+        '/products?filter=bestsellers',
+        '/products?sort=popular',
+        '/products?filter=featured',
+        '/products?sort=featured',
+        '/about',
+        '/contact',
+        '',
+      ].includes(link)
+    ) {
+      setSelectedDestinationType('page');
     } else {
       setSelectedDestinationType('custom');
     }
@@ -371,8 +383,10 @@ export default function AdminPromoBannersPage() {
                   <div className="pt-2 border-t border-[#F1F5F9] flex flex-col gap-1 text-[11px] text-[#475569]">
                     <div className="flex items-center justify-between">
                       <span className="text-[#94A3B8]">Destination:</span>
-                      <span className="font-mono text-[#0284C7] truncate max-w-[150px]">
-                        {banner.cta_link || 'None (Showcase only)'}
+                      <span className="font-medium text-[#0284C7] truncate max-w-[170px]" title={banner.cta_link || ''}>
+                        {banner.cta_link?.startsWith('/categories/')
+                          ? `Category: ${categories.find((c) => `/categories/${c.slug}` === banner.cta_link)?.name || banner.cta_link.replace('/categories/', '')}`
+                          : banner.cta_link || 'None (Showcase only)'}
                       </span>
                     </div>
                     {banner.cta_text && (
@@ -667,8 +681,8 @@ export default function AdminPromoBannersPage() {
             </div>
           </div>
 
-          {/* CTA Button Text & Destination (Optional) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+          {/* CTA Button Text & Destination */}
+          <div className="space-y-4 pt-1">
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-[#0F172A] mb-1">
                 Button Text (Optional)
@@ -681,65 +695,150 @@ export default function AdminPromoBannersPage() {
               />
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#0F172A] mb-1">
-                Destination Link (Optional)
-              </label>
-              <div className="flex gap-2 mb-1">
+            {/* Special Banner Redirection Target Selector */}
+            <div className="space-y-3 p-4 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0]">
+              <div className="flex items-center justify-between">
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#0F172A]">
+                    Banner Redirection Target *
+                  </label>
+                  <p className="text-[11px] text-[#64748B]">Choose the destination when a customer clicks this banner</p>
+                </div>
+
+                {ctaLink && ctaLink.startsWith('/categories/') && (
+                  <span className="text-[10px] bg-[#E0F2FE] text-[#0284C7] font-bold px-2 py-0.5 rounded-full border border-[#BAE6FD]">
+                    Category Linked
+                  </span>
+                )}
+              </div>
+
+              {/* Mode Selector Tabs */}
+              <div className="grid grid-cols-3 gap-1.5 p-1 bg-white rounded-xl border border-[#CBD5E1]">
                 <button
                   type="button"
-                  onClick={() => setSelectedDestinationType('preset')}
+                  onClick={() => {
+                    setSelectedDestinationType('category');
+                    if (categories.length > 0 && !ctaLink.startsWith('/categories/')) {
+                      setCtaLink(`/categories/${categories[0].slug}`);
+                    }
+                  }}
                   className={cn(
-                    'px-2 py-0.5 rounded text-[10px] font-semibold transition-colors',
-                    selectedDestinationType === 'preset'
-                      ? 'bg-[#071324] text-white'
-                      : 'bg-slate-100 text-[#64748B]'
+                    'flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-lg text-xs font-semibold transition-all cursor-pointer',
+                    selectedDestinationType === 'category'
+                      ? 'bg-[#071324] text-[#38BDF8] shadow-xs'
+                      : 'text-[#64748B] hover:text-[#0F172A]'
                   )}
                 >
-                  Presets
+                  <Layers className="w-3.5 h-3.5" />
+                  <span>Saree Category</span>
                 </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedDestinationType('page');
+                    if (!['/products', '/products?filter=new-arrivals', '/products?filter=bestsellers', '/products?filter=featured', '/about', '/contact', ''].includes(ctaLink)) {
+                      setCtaLink('/products');
+                    }
+                  }}
+                  className={cn(
+                    'flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-lg text-xs font-semibold transition-all cursor-pointer',
+                    selectedDestinationType === 'page'
+                      ? 'bg-[#071324] text-[#38BDF8] shadow-xs'
+                      : 'text-[#64748B] hover:text-[#0F172A]'
+                  )}
+                >
+                  <Compass className="w-3.5 h-3.5" />
+                  <span>Store Page</span>
+                </button>
+
                 <button
                   type="button"
                   onClick={() => setSelectedDestinationType('custom')}
                   className={cn(
-                    'px-2 py-0.5 rounded text-[10px] font-semibold transition-colors',
+                    'flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-lg text-xs font-semibold transition-all cursor-pointer',
                     selectedDestinationType === 'custom'
-                      ? 'bg-[#071324] text-white'
-                      : 'bg-slate-100 text-[#64748B]'
+                      ? 'bg-[#071324] text-[#38BDF8] shadow-xs'
+                      : 'text-[#64748B] hover:text-[#0F172A]'
                   )}
                 >
-                  Custom URL
+                  <Link2 className="w-3.5 h-3.5" />
+                  <span>Custom URL</span>
                 </button>
               </div>
 
-              {selectedDestinationType === 'preset' ? (
-                <select
-                  value={ctaLink}
-                  onChange={(e) => setCtaLink(e.target.value)}
-                  className="w-full bg-[#F8FAFC] border border-[#CBD5E1] rounded-lg px-3 py-2 text-xs text-[#0F172A] focus:border-[#0284C7] focus:outline-none"
-                >
-                  <option value="">-- No Link (Showcase Card) --</option>
-                  <option value="/products">All Sarees Catalog (/products)</option>
-                  <option value="/products?sort=newest">New Arrivals (/products?sort=newest)</option>
-                  <option value="/products?sort=featured">Curated Masterpieces (/products?sort=featured)</option>
-                  {categories.map((c) => (
-                    <option key={c.id} value={`/categories/${c.slug}`}>
-                      Category: {c.name}
-                    </option>
-                  ))}
-                  {collections.map((col) => (
-                    <option key={col.id} value={`/collections/${col.slug}`}>
-                      Collection: {col.name}
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <Input
-                  type="text"
-                  placeholder="e.g. /products?sort=newest or https://..."
-                  value={ctaLink}
-                  onChange={(e) => setCtaLink(e.target.value)}
-                />
+              {/* 1. Dedicated Category Selector */}
+              {selectedDestinationType === 'category' && (
+                <div className="space-y-2 pt-1 animate-in fade-in duration-200">
+                  <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#0F172A]">
+                    Select Saree Category to Redirect To:
+                  </label>
+                  <select
+                    value={ctaLink}
+                    onChange={(e) => setCtaLink(e.target.value)}
+                    className="w-full bg-white border border-[#CBD5E1] rounded-xl px-3.5 py-2.5 text-xs text-[#0F172A] focus:border-[#0284C7] focus:outline-none transition-all cursor-pointer font-medium shadow-2xs"
+                  >
+                    <option value="">— Select Category —</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={`/categories/${c.slug}`}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+
+                  {ctaLink && ctaLink.startsWith('/categories/') && (
+                    <div className="flex items-center justify-between text-[11px] text-[#0284C7] bg-[#F0F9FF] border border-[#BAE6FD] px-3.5 py-2 rounded-xl">
+                      <span className="font-medium flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-[#0284C7] animate-pulse" />
+                        <span>Redirects to:</span>
+                        <strong className="text-[#0369A1]">
+                          {categories.find((c) => `/categories/${c.slug}` === ctaLink)?.name || ctaLink}
+                        </strong>
+                      </span>
+                      <span className="font-mono text-[10.5px] text-[#0284C7]/80">{ctaLink}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* 2. Store Pages Selector */}
+              {selectedDestinationType === 'page' && (
+                <div className="space-y-2 pt-1 animate-in fade-in duration-200">
+                  <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#0F172A]">
+                    Select Store Page:
+                  </label>
+                  <select
+                    value={ctaLink}
+                    onChange={(e) => setCtaLink(e.target.value)}
+                    className="w-full bg-white border border-[#CBD5E1] rounded-xl px-3.5 py-2.5 text-xs text-[#0F172A] focus:border-[#0284C7] focus:outline-none transition-all cursor-pointer font-medium shadow-2xs"
+                  >
+                    <option value="/products">All Sarees Catalog (/products)</option>
+                    <option value="/products?filter=new-arrivals">New Arrivals (/products?filter=new-arrivals)</option>
+                    <option value="/products?filter=bestsellers">Best Sellers (/products?filter=bestsellers)</option>
+                    <option value="/products?filter=featured">Featured Sarees (/products?filter=featured)</option>
+                    <option value="/about">About Flourish (/about)</option>
+                    <option value="/contact">Contact & Concierge (/contact)</option>
+                    <option value="">-- No Link (Showcase Display Only) --</option>
+                  </select>
+                </div>
+              )}
+
+              {/* 3. Custom URL Input */}
+              {selectedDestinationType === 'custom' && (
+                <div className="space-y-1.5 pt-1 animate-in fade-in duration-200">
+                  <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#0F172A]">
+                    Custom Path or External Link:
+                  </label>
+                  <Input
+                    type="text"
+                    placeholder="e.g. /products?fabric=silk or https://..."
+                    value={ctaLink}
+                    onChange={(e) => setCtaLink(e.target.value)}
+                  />
+                  <p className="text-[10px] text-[#64748B]">
+                    Enter an internal store route (starting with /) or an external link (https://...).
+                  </p>
+                </div>
               )}
             </div>
           </div>

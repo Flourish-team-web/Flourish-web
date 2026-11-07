@@ -3,15 +3,30 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, ShoppingBag, Heart, Layers, Sparkle } from 'lucide-react';
+import { Home, ShoppingBag, Heart, Layers, Clock } from 'lucide-react';
 import { useWishlist } from '@/hooks/useWishlist';
 import { useCart } from '@/hooks/useCart';
 import { cn } from '@/lib/utils/cn';
 
 export function MobileNav() {
   const pathname = usePathname();
+  const [activeFilter, setActiveFilter] = React.useState<string | null>(null);
   const { count: wishlistCount } = useWishlist();
   const { totalCount: cartCount } = useCart();
+
+  React.useEffect(() => {
+    const updateFilter = () => {
+      if (typeof window !== 'undefined') {
+        const params = new URLSearchParams(window.location.search);
+        setActiveFilter(params.get('filter'));
+      }
+    };
+    updateFilter();
+    window.addEventListener('popstate', updateFilter);
+    return () => {
+      window.removeEventListener('popstate', updateFilter);
+    };
+  }, [pathname]);
 
   // Don't show on admin routes
   if (pathname.startsWith('/admin')) {
@@ -21,7 +36,7 @@ export function MobileNav() {
   const navItems = [
     { label: 'Home', href: '/', icon: Home },
     { label: 'Collections', href: '/products', icon: Layers },
-    { label: 'New Arrivals', href: '/products?sort=newest', icon: Sparkle },
+    { label: 'New Arrivals', href: '/products?filter=new-arrivals', icon: Clock },
     { label: 'Wishlist', href: '/wishlist', icon: Heart, badge: wishlistCount },
     { label: 'Cart', href: '/cart', icon: ShoppingBag, badge: cartCount },
   ];
@@ -31,7 +46,14 @@ export function MobileNav() {
       <div className="flex items-center justify-around">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = pathname === item.href;
+          let isActive = false;
+          if (item.href === '/products?filter=new-arrivals') {
+            isActive = pathname === '/products' && activeFilter === 'new-arrivals';
+          } else if (item.href === '/products') {
+            isActive = pathname === '/products' && !activeFilter;
+          } else {
+            isActive = pathname === item.href;
+          }
 
           return (
             <Link

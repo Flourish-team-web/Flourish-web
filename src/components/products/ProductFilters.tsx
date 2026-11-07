@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
-import { SlidersHorizontal, RotateCcw, Check } from 'lucide-react';
+import { SlidersHorizontal, RotateCcw, Check, Clock, TrendingUp, Star, Layers } from 'lucide-react';
 import { Drawer } from '@/components/ui/Drawer';
 import { Button } from '@/components/ui/Button';
 import { createClient } from '@/lib/supabase/client';
@@ -10,6 +10,13 @@ import { Category } from '@/types/store.types';
 import { FALLBACK_CATEGORIES } from '@/lib/data/catalogFallback';
 import { cn } from '@/lib/utils/cn';
 import Image from 'next/image';
+
+const CURATED_HIGHLIGHTS = [
+  { label: 'All Sarees', value: 'all', icon: Layers, badge: '' },
+  { label: 'New Arrivals', value: 'new-arrivals', icon: Clock, badge: 'New' },
+  { label: 'Best Sellers', value: 'bestsellers', icon: TrendingUp, badge: 'Hot' },
+  { label: 'Featured', value: 'featured', icon: Star, badge: 'Curated' },
+];
 
 const SORT_OPTIONS = [
   { label: 'Newest Off Loom', value: 'newest' },
@@ -66,6 +73,9 @@ export function ProductFilters() {
     }
   }, [currentMaxPrice]);
 
+  // Curated Edit / Filter from URL searchParams
+  const currentFilter = searchParams.get('filter') || searchParams.get('tag') || 'all';
+
   // Category from URL searchParams or pathname
   const isCategoryRoute = pathname.startsWith('/categories/');
   const routeCategorySlug = isCategoryRoute ? pathname.split('/categories/')[1]?.split('/')[0] : '';
@@ -82,6 +92,18 @@ export function ProductFilters() {
     });
     params.delete('page');
     router.push(`?${params.toString()}`, { scroll: false });
+  };
+
+  const handleFilterSelect = (filterValue: string) => {
+    if (isCategoryRoute) {
+      if (filterValue && filterValue !== 'all') {
+        router.push(`/products?filter=${filterValue}`);
+      } else {
+        router.push('/products');
+      }
+    } else {
+      updateFilters({ filter: filterValue === 'all' ? null : filterValue, tag: null });
+    }
   };
 
   const handleCategorySelect = (categorySlug: string | null) => {
@@ -110,17 +132,19 @@ export function ProductFilters() {
 
   const clearAll = () => {
     setMaxPriceValue(SLIDER_MAX);
-    if (isCategoryRoute) {
-      router.push(pathname);
-    } else {
-      router.push('/products');
-    }
+    router.push('/products');
     setIsMobileDrawerOpen(false);
   };
 
   const isPriceFiltered = currentMaxPrice && parseInt(currentMaxPrice, 10) < SLIDER_MAX;
+  const filterLabel = {
+    'new-arrivals': 'New Arrivals',
+    'bestsellers': 'Best Sellers',
+    'featured': 'Featured',
+  }[currentFilter] || null;
 
   const activeFiltersCount = [
+    filterLabel,
     currentCategory && !isCategoryRoute ? currentCategory : null,
     isPriceFiltered ? `Max ₹${Number(currentMaxPrice).toLocaleString('en-IN')}` : null,
     currentSort !== 'newest' ? currentSort : null,
@@ -149,37 +173,82 @@ export function ProductFilters() {
         </div>
       )}
 
-      {/* 1. Weave Categories with Luxury Checkboxes */}
+      {/* 1. Curated Highlights: All Sarees, New Arrivals, Best Sellers, Featured */}
       <div className="space-y-2.5">
         <label className="text-[10px] font-sans uppercase font-bold tracking-[0.2em] text-[#64748B] block">
-          Weaves & Categories
+          Curated Highlights
         </label>
 
         <div className="space-y-1">
-          {/* All Sarees Option */}
-          <button
-            type="button"
-            onClick={() => handleCategorySelect(null)}
-            className={cn(
-              'group w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl text-xs transition-all text-left cursor-pointer',
-              !currentCategory
-                ? 'bg-[#F0F9FF] text-[#0369A1] font-semibold'
-                : 'text-[#334155] hover:bg-[#F8FAFC] hover:text-[#0F172A]'
-            )}
-          >
-            <div
-              className={cn(
-                'w-4 h-4 rounded-md border flex items-center justify-center shrink-0 transition-all',
-                !currentCategory
-                  ? 'bg-[#0284C7] border-[#0284C7] text-white shadow-xs'
-                  : 'bg-white border-[#CBD5E1] group-hover:border-[#0284C7]'
-              )}
-            >
-              {!currentCategory && <Check className="w-3 h-3 stroke-[3]" />}
-            </div>
-            <span>All Sarees</span>
-          </button>
+          {CURATED_HIGHLIGHTS.map((item) => {
+            const isSelected = item.value === 'all'
+              ? !currentFilter || currentFilter === 'all'
+              : currentFilter === item.value;
+            const Icon = item.icon;
 
+            return (
+              <button
+                key={item.value}
+                type="button"
+                onClick={() => handleFilterSelect(item.value)}
+                className={cn(
+                  'group w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs transition-all text-left cursor-pointer',
+                  isSelected
+                    ? 'bg-[#F0F9FF] text-[#0369A1] font-semibold'
+                    : 'text-[#334155] hover:bg-[#F8FAFC] hover:text-[#0F172A]'
+                )}
+              >
+                <div className="flex items-center gap-2.5">
+                  <div
+                    className={cn(
+                      'w-4 h-4 rounded-md border flex items-center justify-center shrink-0 transition-all',
+                      isSelected
+                        ? 'bg-[#0284C7] border-[#0284C7] text-white shadow-xs'
+                        : 'bg-white border-[#CBD5E1] group-hover:border-[#0284C7]'
+                    )}
+                  >
+                    {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                  </div>
+                  <span className="flex items-center gap-1.5">
+                    <Icon className={cn('w-3.5 h-3.5', isSelected ? 'text-[#0284C7]' : 'text-[#64748B]')} />
+                    <span>{item.label}</span>
+                  </span>
+                </div>
+
+                {item.badge && (
+                  <span className={cn(
+                    'text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider',
+                    isSelected ? 'bg-[#0284C7] text-white' : 'bg-[#F1F5F9] text-[#64748B]'
+                  )}>
+                    {item.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="h-[1px] bg-[#F1F5F9]" />
+
+      {/* 2. Weave Categories with Luxury Checkboxes */}
+      <div className="space-y-2.5">
+        <div className="flex items-center justify-between">
+          <label className="text-[10px] font-sans uppercase font-bold tracking-[0.2em] text-[#64748B] block">
+            Saree Categories
+          </label>
+          {currentCategory && (
+            <button
+              type="button"
+              onClick={() => handleCategorySelect(null)}
+              className="text-[10px] text-[#0284C7] hover:underline font-semibold cursor-pointer"
+            >
+              Clear Category
+            </button>
+          )}
+        </div>
+
+        <div className="space-y-1">
           {/* Dynamic Categories with Checkboxes */}
           {categories.map((cat) => {
             const isSelected = currentCategory.toLowerCase() === cat.slug.toLowerCase();
@@ -336,9 +405,9 @@ export function ProductFilters() {
         )}
       </div>
 
-      {/* Desktop Sidebar (Minimalist Luxury Card) */}
-      <aside className="hidden lg:block w-64 shrink-0 pr-4">
-        <div className="sticky top-24 bg-white border border-[#E2E8F0] rounded-2xl p-5 shadow-xs">
+      {/* Desktop Sidebar (Minimalist Luxury Card - Fixed / Sticky on Scroll) */}
+      <aside className="hidden lg:block w-64 shrink-0 sticky top-24 self-start z-20">
+        <div className="bg-white border border-[#E2E8F0] rounded-2xl p-5 shadow-xs max-h-[calc(100vh-7.5rem)] overflow-y-auto scrollbar-none">
           {filterContent}
         </div>
       </aside>
