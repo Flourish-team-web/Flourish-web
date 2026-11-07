@@ -240,9 +240,11 @@ export function Header({ initialCategories }: HeaderProps = {}) {
                 aria-label="View Wishlist"
               >
                 <Heart className="w-5 h-5 stroke-[1.75]" />
-                <span className="absolute top-1 right-1 bg-[#0284C7] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-[0_0_8px_rgba(56,189,248,0.8)]">
-                  {wishlistCount}
-                </span>
+                {wishlistCount > 0 && (
+                  <span className="absolute top-1 right-1 bg-[#0284C7] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-[0_0_8px_rgba(56,189,248,0.8)] animate-in zoom-in">
+                    {wishlistCount}
+                  </span>
+                )}
               </Link>
 
               {/* Shopping Bag CTA / Cart (Mobile & Desktop) */}
