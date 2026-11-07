@@ -30,6 +30,10 @@ export interface ProductFilterParams {
   sortBy?: 'newest' | 'price_asc' | 'price_desc' | 'popular' | 'featured';
   availability?: 'in_stock' | 'out_of_stock' | 'made_to_order' | 'all';
   searchQuery?: string;
+  filter?: 'new-arrivals' | 'bestsellers' | 'featured' | 'all';
+  isNewArrival?: boolean;
+  isBestseller?: boolean;
+  isFeatured?: boolean;
   limit?: number;
   offset?: number;
 }

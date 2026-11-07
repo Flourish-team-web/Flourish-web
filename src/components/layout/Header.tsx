@@ -20,22 +20,43 @@ import { cn } from '@/lib/utils/cn';
 
 const NAV_LINKS = [
   { name: 'Categories', href: '#', hasDropdown: true },
-  { name: 'New Arrivals', href: '/products?sort=newest' },
   { name: 'Collections', href: '/products' },
+  { name: 'New Arrivals', href: '/products?filter=new-arrivals' },
   { name: 'About', href: '/about' },
   { name: 'Contact', href: '/contact' },
 ];
 
-export function Header() {
+interface HeaderProps {
+  initialCategories?: Category[];
+}
+
+export function Header({ initialCategories }: HeaderProps = {}) {
   const pathname = usePathname();
+  const [activeFilter, setActiveFilter] = React.useState<string | null>(null);
   const { count: wishlistCount } = useWishlist();
   const { totalCount: cartCount } = useCart();
   const [isSearchOpen, setIsSearchOpen] = React.useState(false);
   const [isCartOpen, setIsCartOpen] = React.useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const [isScrolled, setIsScrolled] = React.useState(false);
-  const [categories, setCategories] = React.useState<Category[]>(FALLBACK_CATEGORIES);
+  const [categories, setCategories] = React.useState<Category[]>(
+    initialCategories && initialCategories.length > 0 ? initialCategories : FALLBACK_CATEGORIES
+  );
   const [isMobileCategoriesOpen, setIsMobileCategoriesOpen] = React.useState(true);
+
+  React.useEffect(() => {
+    const updateActiveFilter = () => {
+      if (typeof window !== 'undefined') {
+        const params = new URLSearchParams(window.location.search);
+        setActiveFilter(params.get('filter'));
+      }
+    };
+    updateActiveFilter();
+    window.addEventListener('popstate', updateActiveFilter);
+    return () => {
+      window.removeEventListener('popstate', updateActiveFilter);
+    };
+  }, [pathname]);
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -93,7 +114,9 @@ export function Header() {
             <nav className="hidden lg:flex items-center space-x-8 flex-1 justify-center">
               {NAV_LINKS.map((link) => {
                 const isCategoryActive = link.hasDropdown && pathname.startsWith('/categories');
-                const isActive = pathname === link.href || isCategoryActive;
+                const isNewArrivalsActive = link.href.includes('filter=new-arrivals') && pathname === '/products' && activeFilter === 'new-arrivals';
+                const isCollectionsActive = link.href === '/products' && pathname === '/products' && !activeFilter;
+                const isActive = isNewArrivalsActive || isCollectionsActive || isCategoryActive || (pathname === link.href && !link.href.includes('?'));
 
                 if (link.hasDropdown) {
                   return (
@@ -125,10 +148,10 @@ export function Header() {
                         <div className="w-72 bg-gradient-to-b from-[#07172B] to-[#030C18] border border-[#163860] rounded-2xl p-2.5 shadow-2xl backdrop-blur-xl ring-1 ring-black/50">
                           <div className="px-3 py-2 border-b border-[#163860]/60 mb-1 flex items-center justify-between">
                             <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-[#38BDF8]">
-                              Curated Weaves
+                              Saree Categories
                             </span>
                             <span className="text-[10px] text-white/40 font-mono">
-                              {categories.length} varieties
+                              {categories.length} Categories
                             </span>
                           </div>
 
@@ -151,10 +174,10 @@ export function Header() {
                                   </div>
                                 ) : (
                                   <div className="w-7 h-7 rounded-full bg-[#163860] flex items-center justify-center text-[10px] text-[#38BDF8] font-bold shrink-0">
-                                    {cat.name.charAt(0)}
+                                    {cat.name.charAt(0).toUpperCase()}
                                   </div>
                                 )}
-                                <span className="font-serif font-normal tracking-wide group-hover/item:translate-x-1 transition-transform">
+                                <span className="font-serif font-normal tracking-wide capitalize group-hover/item:translate-x-1 transition-transform">
                                   {cat.name}
                                 </span>
                               </Link>
@@ -272,7 +295,9 @@ export function Header() {
             </p>
             <nav className="flex flex-col space-y-3">
               {NAV_LINKS.map((link) => {
-                const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
+                const isNewArrivalsActive = link.href.includes('filter=new-arrivals') && pathname === '/products' && activeFilter === 'new-arrivals';
+                const isCollectionsActive = link.href === '/products' && pathname === '/products' && !activeFilter;
+                const isActive = isNewArrivalsActive || isCollectionsActive || (pathname === link.href && !link.href.includes('?'));
 
                 if (link.hasDropdown) {
                   return (
@@ -302,7 +327,7 @@ export function Header() {
                               className="flex items-center gap-2.5 text-xs text-white/70 hover:text-[#38BDF8] py-1 transition-colors"
                             >
                               <span className="w-1.5 h-1.5 rounded-full bg-[#38BDF8]" />
-                              <span>{cat.name}</span>
+                              <span className="capitalize">{cat.name}</span>
                             </Link>
                           ))}
                         </div>

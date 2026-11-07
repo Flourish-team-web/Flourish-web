@@ -51,7 +51,7 @@ export function AdminLayoutClient({ userEmail, children }: AdminLayoutClientProp
       await supabase.auth.signOut();
       router.push('/admin/login');
     } catch (err) {
-      console.error('Sign out error:', err);
+      console.warn('Sign out notice:', err);
     } finally {
       setIsSigningOut(false);
       setIsSignOutModalOpen(false);

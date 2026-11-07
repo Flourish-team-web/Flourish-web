@@ -40,11 +40,13 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         className="mb-8"
       />
 
-      <SearchInterface
-        initialQuery={query}
-        initialProducts={results.data}
-        totalCount={results.count}
-      />
+      <React.Suspense fallback={<div className="w-full h-48 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl animate-pulse" />}>
+        <SearchInterface
+          initialQuery={query}
+          initialProducts={results.data}
+          totalCount={results.count}
+        />
+      </React.Suspense>
     </div>
   );
 }

@@ -21,9 +21,11 @@ import {
   Tag,
   TrendingUp,
   Star,
+  CopyX,
 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils/cn';
+import { AdminToast, ToastProps } from '@/components/admin/AdminToast';
 
 interface ProductFormProps {
   initialProduct?: ProductWithDetails | null;
@@ -36,6 +38,10 @@ export function ProductForm({ initialProduct }: ProductFormProps) {
   const [categories, setCategories] = React.useState<Category[]>([]);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+  const [toast, setToast] = React.useState<Omit<ToastProps, 'onClose'> | null>(null);
+  const [duplicateField, setDuplicateField] = React.useState<'slug' | 'sku' | null>(null);
+  const slugInputRef = React.useRef<HTMLInputElement>(null);
+  const skuInputRef = React.useRef<HTMLInputElement>(null);
 
   // Form State
   const [name, setName] = React.useState(initialProduct?.name || '');
@@ -82,9 +88,13 @@ export function ProductForm({ initialProduct }: ProductFormProps) {
   const handleNameChange = (val: string) => {
     setName(val);
     setSlug(slugify(val));
+    if (duplicateField === 'slug') setDuplicateField(null);
   };
 
   const handleAutoFill = (data: AutoFillPayload) => {
+    setErrorMessage(null);
+    setToast(null);
+    setDuplicateField(null);
     if (data.name !== undefined) setName(data.name);
     if (data.slug !== undefined) setSlug(data.slug);
     if (data.sku !== undefined) setSku(data.sku);
@@ -129,6 +139,9 @@ export function ProductForm({ initialProduct }: ProductFormProps) {
       return;
     }
 
+    setErrorMessage(null);
+    setToast(null);
+    setDuplicateField(null);
     setIsSubmitting(true);
     const supabase = createClient();
 
@@ -189,15 +202,89 @@ export function ProductForm({ initialProduct }: ProductFormProps) {
       router.push('/admin/products');
       router.refresh();
     } catch (err: any) {
-      console.error('Error saving product:', err);
-      setErrorMessage(err.message || 'Failed to save saree.');
+      // Use console.warn instead of console.error so Next.js Turbopack dev server error overlay does NOT interrupt admin interaction
+      console.warn('[ProductForm] Product save notice:', err?.message || err);
+
+      const errCode = String(err?.code || '');
+      const errMsg = String(err?.message || '');
+      const errDetails = String(err?.details || '');
+      const fullErrStr = `${errCode} ${errMsg} ${errDetails}`.toLowerCase();
+
+      const isDuplicate =
+        errCode === '23505' ||
+        fullErrStr.includes('duplicate') ||
+        fullErrStr.includes('already exists') ||
+        fullErrStr.includes('unique constraint');
+
+      if (isDuplicate) {
+        if (fullErrStr.includes('sku')) {
+          setDuplicateField('sku');
+          const msg = `A saree with SKU code "${sku}" already exists in the catalog. Please enter a different SKU code.`;
+          setErrorMessage(msg);
+          setToast({
+            type: 'warning',
+            title: 'Duplicate Saree SKU Detected',
+            message: msg,
+          });
+          setTimeout(() => {
+            skuInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            skuInputRef.current?.focus();
+          }, 100);
+        } else {
+          setDuplicateField('slug');
+          const targetSlug = slug || slugify(name);
+          const msg = `A saree with the slug "${targetSlug}" already exists in the catalog. Please change the slug or click "Auto-Fix Slug".`;
+          setErrorMessage(msg);
+          setToast({
+            type: 'warning',
+            title: 'Duplicate Saree Slug Detected',
+            message: msg,
+            action: {
+              label: 'Auto-Fix: Add Unique Suffix',
+              onClick: () => {
+                const suffix = Math.floor(100 + Math.random() * 900);
+                setSlug((prev) => `${prev.replace(/-\d{3,4}$/, '')}-${suffix}`);
+                setDuplicateField(null);
+                setErrorMessage(null);
+                setToast(null);
+                setTimeout(() => {
+                  slugInputRef.current?.focus();
+                }, 50);
+              },
+            },
+          });
+          setTimeout(() => {
+            slugInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            slugInputRef.current?.focus();
+          }, 100);
+        }
+      } else {
+        const fallbackMsg = errMsg || errDetails || 'Failed to save saree. Please check your inputs and try again.';
+        setErrorMessage(fallbackMsg);
+        setToast({
+          type: 'error',
+          title: 'Failed to Save Saree',
+          message: fallbackMsg,
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-5xl mx-auto pb-16">
+    <form onSubmit={handleSubmit} className="space-y-6 max-w-5xl mx-auto pb-16 relative">
+      {/* Floating Admin Toast for Duplicates & Notifications */}
+      {toast && (
+        <AdminToast
+          type={toast.type}
+          title={toast.title}
+          message={toast.message}
+          action={toast.action}
+          onClose={() => setToast(null)}
+        />
+      )}
+
       {/* Top Header Navigation Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-[#E2E8F0] rounded-2xl p-4 sm:p-5 shadow-xs sticky top-20 z-30 backdrop-blur-md bg-white/95">
         <div className="flex items-center gap-3">
@@ -331,28 +418,58 @@ export function ProductForm({ initialProduct }: ProductFormProps) {
               <label className="block text-xs font-semibold uppercase tracking-wider text-[#0F172A]">
                 Product Slug *
               </label>
-              {name && (
-                <button
-                  type="button"
-                  onClick={() => setSlug(slugify(name))}
-                  className="text-[10px] text-[#0284C7] hover:underline font-semibold cursor-pointer"
-                >
-                  Auto-generate
-                </button>
-              )}
+              <div className="flex items-center gap-2">
+                {duplicateField === 'slug' && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const suffix = Math.floor(100 + Math.random() * 900);
+                      setSlug((prev) => `${prev.replace(/-\d{3,4}$/, '')}-${suffix}`);
+                      setDuplicateField(null);
+                      setErrorMessage(null);
+                      setToast(null);
+                    }}
+                    className="text-[10px] bg-amber-500/10 text-amber-600 border border-amber-300 px-2 py-0.5 rounded-md hover:bg-amber-500/20 font-bold transition-all cursor-pointer"
+                  >
+                    + Auto-Fix Slug
+                  </button>
+                )}
+                {name && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSlug(slugify(name));
+                      if (duplicateField === 'slug') setDuplicateField(null);
+                    }}
+                    className="text-[10px] text-[#0284C7] hover:underline font-semibold cursor-pointer"
+                  >
+                    Auto-generate
+                  </button>
+                )}
+              </div>
             </div>
             <Input
+              ref={slugInputRef}
               required
               value={slug}
-              onChange={(e) => setSlug(slugify(e.target.value))}
+              error={duplicateField === 'slug' ? `Slug "${slug}" already exists. Please make it unique.` : undefined}
+              onChange={(e) => {
+                setSlug(slugify(e.target.value));
+                if (duplicateField === 'slug') setDuplicateField(null);
+              }}
               placeholder="e.g. flourish-royal-kanchipuram-pure-silk-saree"
             />
           </div>
 
           <Input
+            ref={skuInputRef}
             label="SKU / Product Code"
             value={sku}
-            onChange={(e) => setSku(e.target.value)}
+            error={duplicateField === 'sku' ? `SKU "${sku}" already exists. Please assign a unique code.` : undefined}
+            onChange={(e) => {
+              setSku(e.target.value);
+              if (duplicateField === 'sku') setDuplicateField(null);
+            }}
             placeholder="e.g. FW-KNC-001"
           />
         </div>

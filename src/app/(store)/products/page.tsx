@@ -14,6 +14,8 @@ export const metadata: Metadata = {
 interface ProductsPageProps {
   searchParams: Promise<{
     sort?: 'newest' | 'price_asc' | 'price_desc' | 'popular' | 'featured';
+    filter?: 'new-arrivals' | 'bestsellers' | 'featured' | 'all';
+    tag?: string;
     category?: string;
     fabric?: string;
     occasion?: string;
@@ -26,6 +28,7 @@ interface ProductsPageProps {
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
   const resolvedParams = await searchParams;
+  const currentFilter = (resolvedParams.filter || resolvedParams.tag || 'all') as 'new-arrivals' | 'bestsellers' | 'featured' | 'all';
   const currentPage = resolvedParams.page ? parseInt(resolvedParams.page, 10) : 1;
   const pageSize = 12;
   const offset = (currentPage - 1) * pageSize;
@@ -35,7 +38,8 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
   const result = await getProducts({
     categorySlug: resolvedParams.category,
-    sortBy: resolvedParams.sort || 'newest',
+    filter: currentFilter !== 'all' ? currentFilter : undefined,
+    sortBy: resolvedParams.sort || (currentFilter === 'new-arrivals' ? 'newest' : currentFilter === 'bestsellers' ? 'popular' : currentFilter === 'featured' ? 'featured' : 'newest'),
     fabric: resolvedParams.fabric,
     occasion: resolvedParams.occasion,
     color: resolvedParams.color,
@@ -49,6 +53,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
   const getPageUrl = (newPage: number) => {
     const p = new URLSearchParams();
+    if (resolvedParams.filter) p.set('filter', resolvedParams.filter);
     if (resolvedParams.sort) p.set('sort', resolvedParams.sort);
     if (resolvedParams.category) p.set('category', resolvedParams.category);
     if (resolvedParams.fabric) p.set('fabric', resolvedParams.fabric);
@@ -60,6 +65,33 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     return `/products?${p.toString()}`;
   };
 
+  const headerInfo = {
+    'new-arrivals': {
+      title: 'New Arrivals',
+      crumb: 'New Arrivals',
+      description: 'The newest handcrafted creations and contemporary silk weaves freshly woven by master artisans.',
+    },
+    'bestsellers': {
+      title: 'Best Sellers',
+      crumb: 'Best Sellers',
+      description: 'Our most sought-after and beloved silk creations, cherished by women for celebratory milestones.',
+    },
+    'featured': {
+      title: 'Featured Masterpieces',
+      crumb: 'Featured',
+      description: 'Exquisite bridal and heirloom drapes personally curated for their royal craftsmanship and tested zari.',
+    },
+    'all': {
+      title: 'All Sarees',
+      crumb: 'All Sarees',
+      description: 'Explore the complete Flourish Women’s repertoire of authentic pure silk and festive handloom sarees.',
+    },
+  }[currentFilter] || {
+    title: 'All Sarees',
+    crumb: 'All Sarees',
+    description: 'Explore the complete Flourish Women’s repertoire of authentic pure silk and festive handloom sarees.',
+  };
+
   return (
     <div className="container mx-auto px-4 sm:px-8 md:px-12 lg:px-20 xl:px-24 py-6 sm:py-10 bg-white">
       {/* Clean Luxury Header */}
@@ -68,11 +100,14 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           <div className="flex items-center gap-2 text-[11px] text-[#706B64] uppercase tracking-[0.18em] mb-2 font-medium">
             <Link href="/" className="hover:text-[#0F172A] transition-colors">Home</Link>
             <span>/</span>
-            <span className="text-[#0284C7] font-semibold">All Sarees</span>
+            <span className="text-[#0284C7] font-semibold">{headerInfo.crumb}</span>
           </div>
           <h1 className="font-serif text-3xl sm:text-4xl text-[#0F1C2E] font-medium tracking-tight">
-            All Sarees
+            {headerInfo.title}
           </h1>
+          <p className="text-xs text-[#64748B] mt-1 max-w-xl font-light">
+            {headerInfo.description}
+          </p>
         </div>
 
         <span className="text-xs uppercase tracking-[0.18em] text-[#64748B] font-light">
@@ -81,8 +116,10 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       </div>
 
       {/* Main Layout: Filters + Product Grid */}
-      <div className="flex flex-col lg:flex-row gap-8">
-        <ProductFilters />
+      <div className="flex flex-col lg:flex-row gap-8 items-start">
+        <React.Suspense fallback={<div className="w-full lg:w-64 h-96 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl animate-pulse" />}>
+          <ProductFilters />
+        </React.Suspense>
 
         <div className="flex-1 space-y-8">
           <ProductGrid

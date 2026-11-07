@@ -7,14 +7,15 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { MediaUploader } from '@/components/admin/MediaUploader';
-import { Plus, Edit2, Trash2, Star, Loader2, AlertCircle } from 'lucide-react';
+import { Plus, Edit2, Trash2, Star, Loader2, AlertCircle, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { ConfirmDeleteModal } from '@/components/admin/ConfirmDeleteModal';
 
 export default function AdminTestimonialsPage() {
   const [testimonials, setTestimonials] = React.useState<Testimonial[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const [editingTestimonial, setEditingTestimonial] = React.useState<Testimonial[] | any>(null);
+  const [editingTestimonial, setEditingTestimonial] = React.useState<Testimonial | null>(null);
+  const [cleanedCount, setCleanedCount] = React.useState<number | null>(null);
 
   // Form State
   const [clientName, setClientName] = React.useState('');
@@ -36,7 +37,36 @@ export default function AdminTestimonialsPage() {
       .select('*')
       .order('display_order', { ascending: true });
 
-    if (data) setTestimonials(data);
+    if (data) {
+      const items = (data as unknown as Testimonial[]) || [];
+      // Deduplicate by normalized client_name and content
+      const seen = new Set<string>();
+      const uniqueList: Testimonial[] = [];
+      const duplicateIdsToDelete: string[] = [];
+
+      for (const t of items) {
+        const key = `${(t.client_name || '').trim().toLowerCase()}:::${(t.content || '').trim().toLowerCase()}`;
+        if (seen.has(key)) {
+          duplicateIdsToDelete.push(t.id);
+        } else {
+          seen.add(key);
+          uniqueList.push(t);
+        }
+      }
+
+      // Automatically purge duplicate rows from Supabase
+      if (duplicateIdsToDelete.length > 0) {
+        try {
+          await supabase.from('testimonials').delete().in('id', duplicateIdsToDelete);
+          setCleanedCount(duplicateIdsToDelete.length);
+          setTimeout(() => setCleanedCount(null), 6000);
+        } catch (e) {
+          console.warn('Failed to delete duplicate testimonials from Supabase:', e);
+        }
+      }
+
+      setTestimonials(uniqueList);
+    }
     setIsLoading(false);
   };
 
@@ -79,6 +109,21 @@ export default function AdminTestimonialsPage() {
       return;
     }
 
+    if (isSubmitting) return;
+
+    // Guard: Prevent duplicate testimonial with same client name and review content
+    const isDuplicate = testimonials.some(
+      (t) =>
+        (!editingTestimonial || t.id !== editingTestimonial.id) &&
+        t.client_name.trim().toLowerCase() === clientName.trim().toLowerCase() &&
+        t.content.trim().toLowerCase() === content.trim().toLowerCase()
+    );
+
+    if (isDuplicate) {
+      setErrorMessage('A review with this patron name and identical content already exists. Duplicate rejected.');
+      return;
+    }
+
     setIsSubmitting(true);
     const supabase = createClient();
 
@@ -107,6 +152,7 @@ export default function AdminTestimonialsPage() {
       setIsModalOpen(false);
       fetchTestimonials();
     } catch (err: any) {
+      console.warn('Error saving testimonial:', err?.message || err);
       setErrorMessage(err.message || 'Failed to save testimonial');
     } finally {
       setIsSubmitting(false);
@@ -133,79 +179,93 @@ export default function AdminTestimonialsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#EAE3D2] pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-5">
         <div>
-          <h1 className="font-serif text-2xl sm:text-3xl text-[#1A1816]">Patron Testimonials</h1>
-          <p className="text-xs text-[#706B64] font-sans mt-0.5">
+          <div className="flex items-center gap-2 mb-1">
+            <h1 className="font-serif text-2xl sm:text-3xl text-[#0F172A] font-medium">Patron Testimonials</h1>
+            <span className="text-[11px] font-semibold bg-[#E0F2FE] text-[#0284C7] px-2.5 py-0.5 rounded-full border border-[#BAE6FD]">
+              {testimonials.length} Unique Reviews
+            </span>
+          </div>
+          <p className="text-xs text-[#64748B] font-sans">
             Manage authentic bridal and customer reviews displayed on the storefront.
           </p>
         </div>
 
-        <Button
-          variant="primary"
-          size="md"
-          onClick={openCreateModal}
-          className="flex items-center gap-1.5"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add Testimonial</span>
-        </Button>
+        <div className="flex items-center gap-3">
+          {cleanedCount && (
+            <div className="flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl animate-in fade-in">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+              <span>{cleanedCount} duplicate(s) purged from database</span>
+            </div>
+          )}
+
+          <Button
+            variant="primary"
+            size="md"
+            onClick={openCreateModal}
+            className="flex items-center gap-1.5 bg-[#071324] text-[#38BDF8] border border-[#38BDF8]/60 hover:border-[#38BDF8] rounded-xl shadow-xs"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add Testimonial</span>
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (
         <div className="text-center py-16">
-          <Loader2 className="w-6 h-6 animate-spin text-[#C5A059] mx-auto mb-2" />
-          <p className="text-xs uppercase tracking-widest text-[#706B64]">Loading reviews...</p>
+          <Loader2 className="w-6 h-6 animate-spin text-[#0284C7] mx-auto mb-2" />
+          <p className="text-xs uppercase tracking-widest text-[#64748B]">Loading reviews...</p>
         </div>
       ) : testimonials.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {testimonials.map((t) => (
             <div
               key={t.id}
-              className="bg-[#FDFBF7] border border-[#EAE3D2] p-5 flex flex-col justify-between shadow-xs space-y-4"
+              className="bg-white border border-[#E2E8F0] rounded-2xl p-5 flex flex-col justify-between shadow-xs space-y-4 hover:border-[#0284C7]/40 hover:shadow-md transition-all"
             >
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <div className="flex text-[#C5A059]">
+                  <div className="flex text-amber-400">
                     {Array.from({ length: t.rating }).map((_, i) => (
                       <Star key={i} className="w-3.5 h-3.5 fill-current" />
                     ))}
                   </div>
                   {t.is_featured && (
-                    <span className="text-[9px] bg-[#FAF3E5] text-[#9A7428] px-2 py-0.5 uppercase tracking-wider font-semibold border border-[#E8D4A8]">
-                      Featured
+                    <span className="text-[9px] bg-amber-50 text-amber-700 px-2 py-0.5 uppercase tracking-wider font-semibold border border-amber-200 rounded-md">
+                      Featured on Home
                     </span>
                   )}
                 </div>
 
-                <p className="text-xs text-[#3D3833] font-light italic leading-relaxed line-clamp-4 mb-3">
+                <p className="text-xs text-[#334155] font-light italic leading-relaxed line-clamp-4 mb-3">
                   &ldquo;{t.content}&rdquo;
                 </p>
 
-                <div className="border-t border-[#EAE3D2]/60 pt-3">
-                  <h4 className="font-serif text-sm text-[#1A1816] font-medium">{t.client_name}</h4>
-                  {t.location && <p className="text-[11px] text-[#706B64]">{t.location}</p>}
+                <div className="border-t border-[#F1F5F9] pt-3">
+                  <h4 className="font-serif text-sm text-[#0F172A] font-medium">{t.client_name}</h4>
+                  {t.location && <p className="text-[11px] text-[#64748B]">{t.location}</p>}
                   {t.saree_worn && (
-                    <p className="text-[10px] text-[#C5A059] uppercase tracking-wider font-medium mt-0.5">
+                    <p className="text-[10px] text-[#0284C7] uppercase tracking-wider font-semibold mt-0.5">
                       {t.saree_worn}
                     </p>
                   )}
                 </div>
               </div>
 
-              <div className="border-t border-[#EAE3D2] pt-2 flex items-center justify-between text-[11px] text-[#8F8A80]">
-                <span>Order #{t.display_order}</span>
-                <div className="flex items-center gap-1">
+              <div className="border-t border-[#F1F5F9] pt-2.5 flex items-center justify-between text-[11px] text-[#64748B]">
+                <span className="font-mono">Order #{t.display_order}</span>
+                <div className="flex items-center gap-1.5">
                   <button
                     onClick={() => openEditModal(t)}
-                    className="p-1 text-[#3D3833] hover:text-[#C5A059] transition-colors cursor-pointer"
+                    className="p-1.5 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] text-[#334155] hover:text-[#0284C7] hover:bg-white hover:border-[#BAE6FD] transition-all cursor-pointer"
                     title="Edit Review"
                   >
                     <Edit2 className="w-3.5 h-3.5" />
                   </button>
                   <button
                     onClick={() => setDeleteTarget({ id: t.id, name: t.client_name || 'Review' })}
-                    className="p-1 text-[#706B64] hover:text-red-600 transition-colors cursor-pointer"
+                    className="p-1.5 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] text-[#64748B] hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 transition-all cursor-pointer"
                     title="Delete Review"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
