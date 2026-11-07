@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
-import { Reel, ProductWithDetails } from '@/types/store.types';
+import { Reel } from '@/types/store.types';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
@@ -13,7 +13,6 @@ import { ConfirmDeleteModal } from '@/components/admin/ConfirmDeleteModal';
 
 export default function AdminReelsPage() {
   const [reels, setReels] = React.useState<Reel[]>([]);
-  const [products, setProducts] = React.useState<ProductWithDetails[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [editingReel, setEditingReel] = React.useState<Reel | null>(null);
@@ -22,28 +21,25 @@ export default function AdminReelsPage() {
   const [title, setTitle] = React.useState('');
   const [videoUrl, setVideoUrl] = React.useState('');
   const [thumbnailUrl, setThumbnailUrl] = React.useState('');
-  const [viewCountLabel, setViewCountLabel] = React.useState('12.4k views');
-  const [productId, setProductId] = React.useState('');
   const [displayOrder, setDisplayOrder] = React.useState('0');
   const [isActive, setIsActive] = React.useState(true);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
-  const fetchReelsAndProducts = async () => {
+  const fetchReels = async () => {
     setIsLoading(true);
     const supabase = createClient();
-    const [{ data: reelsData }, { data: productsData }] = await Promise.all([
-      supabase.from('reels').select('*').order('display_order', { ascending: true }),
-      supabase.from('products').select('*').eq('is_published', true).order('name'),
-    ]);
+    const { data: reelsData } = await supabase
+      .from('reels')
+      .select('*')
+      .order('display_order', { ascending: true });
 
     if (reelsData) setReels(reelsData);
-    if (productsData) setProducts(productsData as unknown as ProductWithDetails[]);
     setIsLoading(false);
   };
 
   React.useEffect(() => {
-    fetchReelsAndProducts();
+    fetchReels();
   }, []);
 
   const openCreateModal = () => {
@@ -51,8 +47,6 @@ export default function AdminReelsPage() {
     setTitle('');
     setVideoUrl('');
     setThumbnailUrl('');
-    setViewCountLabel('12.4k views');
-    setProductId('');
     setDisplayOrder('0');
     setIsActive(true);
     setErrorMessage(null);
@@ -64,8 +58,6 @@ export default function AdminReelsPage() {
     setTitle(reel.title);
     setVideoUrl(reel.video_url || '');
     setThumbnailUrl(reel.thumbnail_url);
-    setViewCountLabel(reel.view_count_label || '10.2k views');
-    setProductId(reel.product_id || '');
     setDisplayOrder(reel.display_order.toString());
     setIsActive(reel.is_active);
     setErrorMessage(null);
@@ -74,20 +66,16 @@ export default function AdminReelsPage() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !thumbnailUrl) {
-      setErrorMessage('Title and thumbnail image are required.');
-      return;
-    }
-
+    setErrorMessage(null);
     setIsSubmitting(true);
     const supabase = createClient();
 
     const payload = {
-      title: title.trim(),
+      title: title.trim() || 'Flourish Reel',
       video_url: videoUrl.trim() || null,
-      thumbnail_url: thumbnailUrl,
-      view_count_label: viewCountLabel.trim() || '10.5k views',
-      product_id: productId || null,
+      thumbnail_url: thumbnailUrl.trim() || '/images/placeholder-saree.svg',
+      view_count_label: editingReel ? editingReel.view_count_label : null,
+      product_id: editingReel ? editingReel.product_id : null,
       display_order: parseInt(displayOrder, 10) || 0,
       is_active: isActive,
     };
@@ -104,7 +92,7 @@ export default function AdminReelsPage() {
       }
 
       setIsModalOpen(false);
-      fetchReelsAndProducts();
+      fetchReels();
     } catch (err: any) {
       setErrorMessage(err.message || 'Failed to save reel');
     } finally {
@@ -189,10 +177,12 @@ export default function AdminReelsPage() {
                   )}
                 </div>
 
-                <div className="absolute bottom-2 left-2 right-2 text-white text-[10px] flex items-center gap-1">
-                  <Eye className="w-3 h-3 text-[#E8D4A8]" />
-                  <span>{reel.view_count_label || '8.5k views'}</span>
-                </div>
+                {reel.view_count_label && (
+                  <div className="absolute bottom-2 left-2 right-2 text-white text-[10px] flex items-center gap-1">
+                    <Eye className="w-3 h-3 text-[#E8D4A8]" />
+                    <span>{reel.view_count_label}</span>
+                  </div>
+                )}
               </div>
 
               <div className="p-3 space-y-1">
@@ -253,44 +243,18 @@ export default function AdminReelsPage() {
           )}
 
           <Input
-            label="Reel Title *"
-            required
+            label="Reel Title"
             placeholder="e.g. Traditional Muhurtham Drape Guide"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
-
-          <Input
-            label="View Count Label"
-            placeholder="e.g. 15.2k views"
-            value={viewCountLabel}
-            onChange={(e) => setViewCountLabel(e.target.value)}
-          />
-
-          <div className="space-y-1.5">
-            <label className="block text-xs font-medium uppercase tracking-wider text-[#706B64]">
-              Associated Saree Product (Optional)
-            </label>
-            <select
-              value={productId}
-              onChange={(e) => setProductId(e.target.value)}
-              className="w-full bg-[#FAF7F2] border border-[#E0D8C8] px-3 py-2 text-xs text-[#1A1816] focus:border-[#1A1816] focus:outline-none"
-            >
-              <option value="">— None / General Styling —</option>
-              {products.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name} ({p.fabric || 'Saree'})
-                </option>
-              ))}
-            </select>
-          </div>
 
           <MediaUploader
             value={thumbnailUrl}
             onChange={(url) => setThumbnailUrl(url as string)}
             maxFiles={1}
             folder="flourish-woman/reels/thumbs"
-            label="Portrait Thumbnail Photo *"
+            label="Portrait Thumbnail Photo"
           />
 
           <MediaUploader
