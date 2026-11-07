@@ -107,7 +107,7 @@ export default async function CategoryDetailPage({ params, searchParams }: Categ
       </div>
 
       {/* Main Layout: Filters + Product Grid */}
-      <div className="flex flex-col lg:flex-row gap-8">
+      <div className="flex flex-col lg:flex-row gap-8 items-start">
         <ProductFilters />
 
         <div className="flex-1 space-y-8">

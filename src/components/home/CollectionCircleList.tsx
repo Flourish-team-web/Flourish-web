@@ -4,25 +4,15 @@ import * as React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Category } from '@/types/store.types';
+import { FALLBACK_CATEGORIES } from '@/lib/data/catalogFallback';
 import { cn } from '@/lib/utils/cn';
-
-// Placeholder categories with Unsplash saree images
-const PLACEHOLDER_CATEGORIES = [
-  { id: 'c1', name: 'Kanchipuram Sarees', slug: 'kanchipuram', image_url: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=400&auto=format&fit=crop', description: null, display_order: 0, is_featured: true, created_at: '', updated_at: '' },
-  { id: 'c2', name: 'Banarasi Sarees', slug: 'banarasi', image_url: 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=400&auto=format&fit=crop', description: null, display_order: 1, is_featured: true, created_at: '', updated_at: '' },
-  { id: 'c3', name: 'Soft Silk', slug: 'soft-silk', image_url: 'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?q=80&w=400&auto=format&fit=crop', description: null, display_order: 2, is_featured: true, created_at: '', updated_at: '' },
-  { id: 'c4', name: 'Organza Sarees', slug: 'organza', image_url: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=400&auto=format&fit=crop&crop=top', description: null, display_order: 3, is_featured: true, created_at: '', updated_at: '' },
-  { id: 'c5', name: 'Cotton Sarees', slug: 'cotton', image_url: 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=400&auto=format&fit=crop&crop=bottom', description: null, display_order: 4, is_featured: true, created_at: '', updated_at: '' },
-  { id: 'c6', name: 'Festive Collection', slug: 'festive', image_url: 'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?q=80&w=400&auto=format&fit=crop&crop=faces', description: null, display_order: 5, is_featured: true, created_at: '', updated_at: '' },
-  { id: 'c7', name: 'Designer Sarees', slug: 'designer', image_url: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=400&auto=format&fit=crop&crop=entropy', description: null, display_order: 6, is_featured: true, created_at: '', updated_at: '' },
-];
 
 interface CollectionCircleListProps {
   categories: Category[];
 }
 
 export function CollectionCircleList({ categories }: CollectionCircleListProps) {
-  const displayCategories = (categories && categories.length > 0 ? categories : PLACEHOLDER_CATEGORIES) as typeof PLACEHOLDER_CATEGORIES;
+  const displayCategories = categories && categories.length > 0 ? categories : FALLBACK_CATEGORIES;
 
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = React.useState(0);
@@ -113,7 +103,7 @@ export function CollectionCircleList({ categories }: CollectionCircleListProps) 
                   />
                 </div>
               </div>
-              <span className="font-sans text-xs sm:text-sm text-[#0F172A] font-medium tracking-tight transition-colors mt-2.5 leading-snug group-hover:text-[#0284C7] line-clamp-2">
+              <span className="font-sans text-xs sm:text-sm text-[#0F172A] font-medium tracking-tight transition-colors mt-2.5 leading-snug group-hover:text-[#0284C7] line-clamp-2 capitalize">
                 {cat.name}
               </span>
             </Link>

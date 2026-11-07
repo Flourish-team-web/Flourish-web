@@ -68,6 +68,14 @@ export async function getProducts(params: ProductFilterParams = {}): Promise<Pag
       query = query.eq('availability', params.availability);
     }
 
+    if (params.filter === 'new-arrivals' || params.isNewArrival) {
+      query = query.eq('is_new_arrival', true);
+    } else if (params.filter === 'bestsellers' || params.isBestseller) {
+      query = query.eq('is_bestseller', true);
+    } else if (params.filter === 'featured' || params.isFeatured) {
+      query = query.eq('is_featured', true);
+    }
+
     // Sort order
     switch (params.sortBy) {
       case 'price_asc':
@@ -155,6 +163,14 @@ function filterFallbackProducts(params: ProductFilterParams): PaginatedResult<Pr
 
   if (params.availability && params.availability !== 'all') {
     list = list.filter((p) => p.availability === params.availability);
+  }
+
+  if (params.filter === 'new-arrivals' || params.isNewArrival) {
+    list = list.filter((p) => p.is_new_arrival);
+  } else if (params.filter === 'bestsellers' || params.isBestseller) {
+    list = list.filter((p) => p.is_bestseller);
+  } else if (params.filter === 'featured' || params.isFeatured) {
+    list = list.filter((p) => p.is_featured);
   }
 
   if (params.searchQuery) {

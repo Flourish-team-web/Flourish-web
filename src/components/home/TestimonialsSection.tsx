@@ -10,14 +10,25 @@ interface TestimonialsSectionProps {
 }
 
 export function TestimonialsSection({ testimonials }: TestimonialsSectionProps) {
-  if (!testimonials || testimonials.length === 0) {
+  // Deduplicate testimonials by client_name + content so no review repeats
+  const uniqueTestimonials = React.useMemo(() => {
+    const seen = new Set<string>();
+    return (testimonials || []).filter((t) => {
+      const key = `${(t.client_name || '').trim().toLowerCase()}:::${(t.content || '').trim().toLowerCase()}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [testimonials]);
+
+  if (!uniqueTestimonials || uniqueTestimonials.length === 0) {
     return null;
   }
 
   // Ensure enough base items so the marquee flows continuously
-  let baseItems = [...testimonials];
-  while (baseItems.length < 4) {
-    baseItems = [...baseItems, ...testimonials];
+  let baseItems = [...uniqueTestimonials];
+  while (baseItems.length > 0 && baseItems.length < 4) {
+    baseItems = [...baseItems, ...uniqueTestimonials];
   }
 
   // Duplicate for seamless 50% infinite loop
@@ -28,15 +39,18 @@ export function TestimonialsSection({ testimonials }: TestimonialsSectionProps) 
       {/* Background subtle luxury glow */}
       <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[800px] h-[350px] bg-gradient-to-b from-[#38BDF8]/10 via-[#0284C7]/5 to-transparent rounded-full blur-3xl pointer-events-none" />
 
-      {/* Section Header (without buttons) */}
-      <div className="container mx-auto px-4 sm:px-8 md:px-12 lg:px-20 xl:px-24 mb-10 text-center sm:text-left">
+      {/* Section Header */}
+      <div className="container mx-auto px-4 sm:px-8 md:px-12 lg:px-20 xl:px-24 mb-10">
         <div>
           <p className="text-[11px] uppercase tracking-[0.25em] text-[#0284C7] font-bold mb-1.5">
-            Patron Diaries
+            Patron Diaries • Verified Reviews
           </p>
           <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-[#0F172A] font-medium tracking-tight">
             Cherished by Women Worldwide
           </h2>
+          <p className="text-xs sm:text-sm text-[#64748B] mt-1.5 max-w-xl font-light">
+            Real stories and celebratory moments shared by our brides, connoisseurs, and saree lovers across India.
+          </p>
         </div>
       </div>
 
@@ -53,7 +67,7 @@ export function TestimonialsSection({ testimonials }: TestimonialsSectionProps) 
             return (
               <div
                 key={`${t.id}-${idx}`}
-                className="w-[300px] sm:w-[380px] md:w-[420px] shrink-0 bg-white border border-[#E2E8F0] hover:border-[#0284C7]/50 rounded-3xl p-6 sm:p-7 flex flex-col justify-between relative shadow-xs hover:shadow-xl hover:shadow-slate-200/80 transition-all duration-300 select-none group/card"
+                className="w-[300px] sm:w-[380px] md:w-[420px] min-h-[280px] shrink-0 bg-white border border-[#E2E8F0] hover:border-[#0284C7]/50 rounded-3xl p-6 sm:p-7 flex flex-col justify-between relative shadow-xs hover:shadow-xl hover:shadow-slate-200/80 transition-all duration-300 select-none group/card"
               >
                 {/* Top Row: Stars + Quote Icon */}
                 <div className="flex items-center justify-between mb-4">
