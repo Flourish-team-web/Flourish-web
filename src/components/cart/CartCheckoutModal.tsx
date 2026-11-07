@@ -6,13 +6,11 @@ import { Modal } from '@/components/ui/Modal';
 import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
 import {
   CheckCircle2,
-  ShieldCheck,
   MapPin,
   Phone,
   User,
   Loader2,
   Package,
-  Truck,
   ShoppingBag,
 } from 'lucide-react';
 import { CartItem } from '@/types/store.types';
@@ -127,6 +125,16 @@ export function CartCheckoutModal({
 
   const totalPieces = cartItems.reduce((acc, i) => acc + i.quantity, 0);
 
+  if (!isOpen) return null;
+
+  const firstItem = cartItems[0];
+  const itemTitle =
+    cartItems.length === 0
+      ? 'Your Bag'
+      : cartItems.length === 1
+      ? (firstItem?.name ?? 'Saree')
+      : `${firstItem?.name ?? 'Saree'} + ${cartItems.length - 1} more`;
+
   return (
     <Modal
       isOpen={isOpen}
@@ -162,9 +170,7 @@ export function CartCheckoutModal({
               Curated Bag Checkout
             </span>
             <h4 className="font-serif text-sm sm:text-base md:text-lg text-[#0F172A] font-medium line-clamp-1 leading-snug">
-              {cartItems.length === 1
-                ? cartItems[0].name
-                : `${cartItems[0].name} + ${cartItems.length - 1} more`}
+              {itemTitle}
             </h4>
             <div className="flex items-center gap-2.5 mt-1.5 text-xs text-[#64748B]">
               <span className="flex items-center gap-1 font-medium text-[#0F172A]">
@@ -181,9 +187,6 @@ export function CartCheckoutModal({
           </span>
           <span className="font-sans text-xl sm:text-2xl font-bold text-[#0F172A] block">
             {formatCurrencyINR(totalPrice)}
-          </span>
-          <span className="block text-[10px] text-emerald-600 font-medium mt-0.5">
-            Free Insured Dispatch
           </span>
         </div>
       </div>
@@ -386,24 +389,6 @@ export function CartCheckoutModal({
                 </>
               )}
             </button>
-
-            {/* Trust Footer */}
-            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs text-[#64748B]">
-              <span className="flex items-center gap-1.5 font-medium">
-                <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                Verified Handloom
-              </span>
-              <span className="text-[#CBD5E1] hidden sm:inline">•</span>
-              <span className="flex items-center gap-1.5 font-medium">
-                <Truck className="w-4 h-4 text-[#0284C7] shrink-0" />
-                Insured Dispatch
-              </span>
-              <span className="text-[#CBD5E1] hidden sm:inline">•</span>
-              <span className="flex items-center gap-1.5 font-medium">
-                <Package className="w-4 h-4 text-[#0284C7] shrink-0" />
-                Custom Fitting & Saree Care
-              </span>
-            </div>
           </div>
         </form>
       )}

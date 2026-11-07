@@ -1,7 +1,7 @@
 import * as React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { PromotionalBanner } from '@/types/store.types';
 import { cn } from '@/lib/utils/cn';
 
@@ -22,8 +22,7 @@ export function FlourishSignature({ banners }: FlourishSignatureProps) {
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-8 sm:mb-10">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E0F2FE] border border-[#BAE6FD] text-[#0284C7] text-[10px] sm:text-[11px] uppercase font-bold tracking-[0.2em] mb-2">
-              <Sparkles className="w-3 h-3 text-[#0284C7]" />
+            <div className="inline-flex items-center px-3 py-1 rounded-full bg-[#E0F2FE] border border-[#BAE6FD] text-[#0284C7] text-[10px] sm:text-[11px] uppercase font-bold tracking-[0.2em] mb-2">
               <span>Signature Edits</span>
             </div>
             <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl text-[#0F1C2E] font-medium tracking-tight">

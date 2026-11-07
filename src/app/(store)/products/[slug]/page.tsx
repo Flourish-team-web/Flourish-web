@@ -86,12 +86,12 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="py-6 sm:py-10 bg-white">
-        <div className="container mx-auto px-4 sm:px-8 md:px-12 lg:px-20 xl:px-24 max-w-7xl">
+      <div className="py-4 sm:py-6 lg:py-8 bg-white">
+        <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 max-w-7xl">
           {/* Main Product Presentation (Proportionate split screen) */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start mb-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 xl:gap-10 items-start mb-10 lg:mb-14">
             {/* Left: Compact Gallery Column */}
-            <div className="lg:col-span-6 flex justify-center lg:justify-start lg:sticky lg:top-24">
+            <div className="lg:col-span-6 xl:col-span-6 flex justify-center lg:justify-start lg:sticky lg:top-20">
               <ProductGallery
                 images={product.images || []}
                 productName={product.name}
@@ -99,24 +99,24 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             </div>
 
             {/* Right: Info Column */}
-            <div className="lg:col-span-6">
+            <div className="lg:col-span-6 xl:col-span-6">
               <ProductInfo product={product} />
             </div>
           </div>
-
-          {/* Related Creations Section */}
-          {relatedProducts.length > 0 && (
-            <div className="border-t border-[#E2E8F0] pt-6">
-              <ProductCarouselSection
-                eyebrow="Curated For You"
-                title="You May Also Cherish"
-                subtitle="More handpicked drapes crafted by master artisans"
-                viewAllLink="/products"
-                products={relatedProducts}
-              />
-            </div>
-          )}
         </div>
+
+        {/* Related Creations Section */}
+        {relatedProducts.length > 0 && (
+          <div className="border-t border-[#E2E8F0]">
+            <ProductCarouselSection
+              eyebrow="Curated For You"
+              title="You May Also Cherish"
+              subtitle="More handpicked drapes crafted by master artisans"
+              viewAllLink="/products"
+              products={relatedProducts}
+            />
+          </div>
+        )}
       </div>
     </>
   );

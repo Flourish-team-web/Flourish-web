@@ -21,12 +21,14 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils/cn';
+import { ConfirmDeleteModal } from '@/components/admin/ConfirmDeleteModal';
 
 export default function AdminProductsPage() {
   const [products, setProducts] = React.useState<ProductWithDetails[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [searchQuery, setSearchQuery] = React.useState('');
-  const [deletingId, setDeletingId] = React.useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = React.useState<{ id: string; name: string } | null>(null);
+  const [isDeleting, setIsDeleting] = React.useState(false);
   const [filterStatus, setFilterStatus] = React.useState<'all' | 'published' | 'draft'>('all');
 
   const fetchProducts = async () => {
@@ -76,19 +78,20 @@ export default function AdminProductsPage() {
     );
   };
 
-  const handleDelete = async (id: string, name: string) => {
-    if (!window.confirm(`Permanently delete "${name}"?`)) return;
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
 
-    setDeletingId(id);
+    setIsDeleting(true);
     const supabase = createClient();
-    const { error } = await supabase.from('products').delete().eq('id', id);
+    const { error } = await supabase.from('products').delete().eq('id', deleteTarget.id);
 
     if (!error) {
-      setProducts(products.filter((p) => p.id !== id));
+      setProducts((prev) => prev.filter((p) => p.id !== deleteTarget.id));
+      setDeleteTarget(null);
     } else {
       alert('Failed to delete: ' + error.message);
     }
-    setDeletingId(null);
+    setIsDeleting(false);
   };
 
   const filteredProducts = products.filter((p) => {
@@ -288,33 +291,28 @@ export default function AdminProductsPage() {
                       </td>
 
                       <td className="px-4 py-3.5 text-right">
-                        <div className="inline-flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                        <div className="inline-flex items-center gap-1.5">
                           <Link
                             href={`/products/${p.slug}`}
                             target="_blank"
-                            className="p-1.5 rounded-lg text-[#94A3B8] hover:text-[#0284C7] hover:bg-[#EFF6FF] transition-colors"
+                            className="p-1.5 rounded-lg text-[#475569] hover:text-[#0284C7] bg-[#F8FAFC] hover:bg-[#E0F2FE] border border-[#E2E8F0] hover:border-[#BAE6FD] transition-all shadow-2xs"
                             title="View on store"
                           >
                             <Eye className="w-3.5 h-3.5" />
                           </Link>
                           <Link
                             href={`/admin/products/${p.id}/edit`}
-                            className="p-1.5 rounded-lg text-[#94A3B8] hover:text-[#0284C7] hover:bg-[#EFF6FF] transition-colors"
+                            className="p-1.5 rounded-lg text-[#475569] hover:text-[#0284C7] bg-[#F8FAFC] hover:bg-[#E0F2FE] border border-[#E2E8F0] hover:border-[#BAE6FD] transition-all shadow-2xs"
                             title="Edit"
                           >
                             <Edit2 className="w-3.5 h-3.5" />
                           </Link>
                           <button
-                            onClick={() => handleDelete(p.id, p.name)}
-                            disabled={deletingId === p.id}
-                            className="p-1.5 rounded-lg text-[#94A3B8] hover:text-rose-500 hover:bg-rose-50 transition-colors disabled:opacity-50 cursor-pointer"
+                            onClick={() => setDeleteTarget({ id: p.id, name: p.name })}
+                            className="p-1.5 rounded-lg text-[#475569] hover:text-rose-600 bg-[#F8FAFC] hover:bg-rose-50 border border-[#E2E8F0] hover:border-rose-200 transition-all shadow-2xs cursor-pointer"
                             title="Delete"
                           >
-                            {deletingId === p.id ? (
-                              <Loader2 className="w-3.5 h-3.5 animate-spin text-rose-500" />
-                            ) : (
-                              <Trash2 className="w-3.5 h-3.5" />
-                            )}
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       </td>
@@ -346,6 +344,15 @@ export default function AdminProductsPage() {
           )}
         </div>
       )}
+      {/* Permanent Delete Confirmation Modal */}
+      <ConfirmDeleteModal
+        isOpen={Boolean(deleteTarget)}
+        onClose={() => !isDeleting && setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+        itemType="product"
+        itemName={deleteTarget?.name}
+        isDeleting={isDeleting}
+      />
     </div>
   );
 }

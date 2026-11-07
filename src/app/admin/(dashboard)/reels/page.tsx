@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { MediaUploader } from '@/components/admin/MediaUploader';
 import { Plus, Edit2, Trash2, CheckCircle2, XCircle, Play, Loader2, AlertCircle, Eye } from 'lucide-react';
+import { ConfirmDeleteModal } from '@/components/admin/ConfirmDeleteModal';
 
 export default function AdminReelsPage() {
   const [reels, setReels] = React.useState<Reel[]>([]);
@@ -111,16 +112,22 @@ export default function AdminReelsPage() {
     }
   };
 
-  const handleDelete = async (id: string, title: string) => {
-    if (!window.confirm(`Are you sure you want to delete reel "${title}"?`)) return;
+  const [deleteTarget, setDeleteTarget] = React.useState<{ id: string; title: string } | null>(null);
+  const [isDeleting, setIsDeleting] = React.useState(false);
 
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+
+    setIsDeleting(true);
     const supabase = createClient();
-    const { error } = await supabase.from('reels').delete().eq('id', id);
+    const { error } = await supabase.from('reels').delete().eq('id', deleteTarget.id);
     if (!error) {
-      setReels(reels.filter((r) => r.id !== id));
+      setReels((prev) => prev.filter((r) => r.id !== deleteTarget.id));
+      setDeleteTarget(null);
     } else {
       alert('Error deleting reel: ' + error.message);
     }
+    setIsDeleting(false);
   };
 
   return (
@@ -207,7 +214,7 @@ export default function AdminReelsPage() {
                     <Edit2 className="w-3.5 h-3.5" />
                   </button>
                   <button
-                    onClick={() => handleDelete(reel.id, reel.title)}
+                    onClick={() => setDeleteTarget({ id: reel.id, title: reel.title || 'Reel' })}
                     className="p-1 text-[#706B64] hover:text-red-600 transition-colors cursor-pointer"
                     title="Delete Reel"
                   >
@@ -336,6 +343,16 @@ export default function AdminReelsPage() {
           </div>
         </form>
       </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmDeleteModal
+        isOpen={Boolean(deleteTarget)}
+        onClose={() => !isDeleting && setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+        itemType="reel"
+        itemName={deleteTarget?.title}
+        isDeleting={isDeleting}
+      />
     </div>
   );
 }

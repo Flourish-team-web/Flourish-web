@@ -20,7 +20,7 @@ import {
   ExternalLink,
   ShieldCheck,
   ShoppingBag,
-  Sparkles,
+  BadgePercent,
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -177,7 +177,7 @@ export default async function AdminDashboardPage() {
       title: 'Promo Banners',
       desc: 'Flourish Signature',
       href: '/admin/promo-banners',
-      icon: Sparkles,
+      icon: BadgePercent,
       color: 'text-amber-500',
       bg: 'bg-amber-50 hover:bg-amber-100/70 border-amber-200',
     },
