@@ -4,13 +4,17 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { MobileNav } from '@/components/layout/MobileNav';
 import { getCategories } from '@/services/categoryService';
+import { getSiteSettings } from '@/services/settingsService';
 
 export default async function StoreLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const categories = await getCategories();
+  const [categories, settings] = await Promise.all([
+    getCategories(),
+    getSiteSettings(),
+  ]);
 
   return (
     <div className="flex flex-col min-h-screen w-full max-w-full relative">
@@ -18,7 +22,7 @@ export default async function StoreLayout({
         <Header initialCategories={categories} />
       </Suspense>
       <main className="flex-1 w-full max-w-full min-w-0">{children}</main>
-      <Footer />
+      <Footer initialSettings={settings} />
       <Suspense fallback={null}>
         <MobileNav />
       </Suspense>

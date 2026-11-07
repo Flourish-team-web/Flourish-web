@@ -8,10 +8,10 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     tagline: 'Wear Your Own Story',
     announcement_text: 'Discover Timeless Sarees for Every Occasion | Complimentary Styling Assistance',
     is_announcement_active: true,
-    whatsapp_number: '919876543210',
-    contact_email: 'concierge@flourishwomens.com',
-    contact_phone: '+91 98765 43210',
-    address: 'Boutique Studio, India',
+    whatsapp_number: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '916235035705',
+    contact_email: 'concierge@flourishwomen.com',
+    contact_phone: '+91 62350 35705',
+    address: 'Flourish Studio, Kanchipuram & Chennai, Tamil Nadu, India',
     instagram_url: 'https://instagram.com',
     facebook_url: 'https://facebook.com',
     pinterest_url: 'https://pinterest.com',
@@ -27,12 +27,23 @@ export async function getSiteSettings(): Promise<SiteSettings> {
       .eq('id', 'global')
       .single();
 
-    if (error || !data) return fallbackSettings;
-    return data;
+    const settingsData = data as SiteSettings | null;
+
+    if (!error && settingsData) {
+      return {
+        ...fallbackSettings,
+        ...settingsData,
+        address: settingsData.address || fallbackSettings.address,
+        contact_phone: settingsData.contact_phone || fallbackSettings.contact_phone,
+        contact_email: settingsData.contact_email || fallbackSettings.contact_email,
+        whatsapp_number: settingsData.whatsapp_number || fallbackSettings.whatsapp_number,
+      };
+    }
   } catch (err) {
-    console.error('Failed to get site settings:', err);
-    return fallbackSettings;
+    console.warn('Site settings query fallback used:', err);
   }
+
+  return fallbackSettings;
 }
 
 export async function getSocialLinks(): Promise<SocialLink[]> {

@@ -5,9 +5,53 @@ import Link from 'next/link';
 import { MapPin, Phone, Mail, ChevronDown } from 'lucide-react';
 import { BrandLogo } from '@/components/ui/BrandLogo';
 import { buildBespokeWhatsAppUrl } from '@/lib/whatsapp/urlBuilder';
+import { SiteSettings } from '@/types/store.types';
+import { createClient } from '@/lib/supabase/client';
 
-export function Footer() {
+interface FooterProps {
+  initialSettings?: SiteSettings | null;
+}
+
+export function Footer({ initialSettings }: FooterProps = {}) {
   const [openSections, setOpenSections] = React.useState<{ [key: string]: boolean }>({});
+  const [settings, setSettings] = React.useState<SiteSettings | null>(initialSettings ?? null);
+
+  React.useEffect(() => {
+    if (initialSettings) {
+      setSettings(initialSettings);
+    }
+  }, [initialSettings]);
+
+  React.useEffect(() => {
+    const fetchLatestSettings = async () => {
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from('site_settings')
+          .select('*')
+          .eq('id', 'global')
+          .single();
+        if (!error && data) {
+          setSettings(data as SiteSettings);
+        }
+      } catch {
+        // Fallbacks will gracefully handle display
+      }
+    };
+
+    if (!initialSettings) {
+      fetchLatestSettings();
+    }
+
+    const handleUpdate = () => {
+      fetchLatestSettings();
+    };
+
+    window.addEventListener('site_settings_updated', handleUpdate);
+    return () => {
+      window.removeEventListener('site_settings_updated', handleUpdate);
+    };
+  }, [initialSettings]);
 
   const toggleSection = (key: string) => {
     setOpenSections((prev) => ({
@@ -17,6 +61,13 @@ export function Footer() {
   };
 
   const currentYear = new Date().getFullYear();
+
+  // Admin added settings with graceful fallbacks
+  const address = settings?.address?.trim() || 'Flourish Studio, Kanchipuram & Chennai, Tamil Nadu, India';
+  const phone = settings?.contact_phone?.trim() || settings?.whatsapp_number?.trim() || '+91 62350 35705';
+  const cleanTelHref = phone.replace(/[^0-9+]/g, '');
+  const email = settings?.contact_email?.trim() || 'concierge@flourishwomen.com';
+  const whatsappNumber = settings?.whatsapp_number?.trim();
 
   return (
     <footer className="bg-gradient-to-b from-[#06182E] via-[#041021] to-[#01060E] text-[#F8FAFC] pt-14 pb-24 lg:pb-10 border-t border-[#163860]">
@@ -110,7 +161,7 @@ export function Footer() {
                 </li>
                 <li>
                   <a
-                    href={buildBespokeWhatsAppUrl(undefined)}
+                    href={buildBespokeWhatsAppUrl(whatsappNumber || undefined)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-white transition-colors block py-0.5"
@@ -140,27 +191,39 @@ export function Footer() {
               />
             </button>
             <div className={`${openSections['contact-location'] ? 'block pt-3 pb-2' : 'hidden md:block'} md:mt-4 space-y-3.5`}>
-              {/* Place */}
-              <div className="flex items-start gap-2.5 text-xs text-[#94A3B8] font-light">
-                <MapPin className="w-4 h-4 text-[#38BDF8] shrink-0 mt-0.5" />
-                <span>Flourish Studio, Kanchipuram & Chennai, Tamil Nadu, India</span>
-              </div>
+              {/* Place / Address */}
+              {address && (
+                <div className="flex items-start gap-2.5 text-xs text-[#94A3B8] font-light">
+                  <MapPin className="w-4 h-4 text-[#38BDF8] shrink-0 mt-0.5" />
+                  <span className="whitespace-pre-line leading-relaxed">{address}</span>
+                </div>
+              )}
 
               {/* Phone */}
-              <div className="flex items-center gap-2.5 text-xs text-[#94A3B8] font-light">
-                <Phone className="w-4 h-4 text-[#38BDF8] shrink-0" />
-                <a href="tel:+919876543210" className="hover:text-white transition-colors">
-                  +91 98765 43210
-                </a>
-              </div>
+              {phone && (
+                <div className="flex items-center gap-2.5 text-xs text-[#94A3B8] font-light">
+                  <Phone className="w-4 h-4 text-[#38BDF8] shrink-0" />
+                  <a
+                    href={`tel:${cleanTelHref}`}
+                    className="hover:text-white transition-colors tracking-wide"
+                  >
+                    {phone}
+                  </a>
+                </div>
+              )}
 
               {/* Mail */}
-              <div className="flex items-center gap-2.5 text-xs text-[#94A3B8] font-light">
-                <Mail className="w-4 h-4 text-[#38BDF8] shrink-0" />
-                <a href="mailto:concierge@flourishwomen.com" className="hover:text-white transition-colors truncate">
-                  concierge@flourishwomen.com
-                </a>
-              </div>
+              {email && (
+                <div className="flex items-center gap-2.5 text-xs text-[#94A3B8] font-light">
+                  <Mail className="w-4 h-4 text-[#38BDF8] shrink-0" />
+                  <a
+                    href={`mailto:${email}`}
+                    className="hover:text-white transition-colors truncate"
+                  >
+                    {email}
+                  </a>
+                </div>
+              )}
             </div>
           </div>
         </div>
