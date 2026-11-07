@@ -23,6 +23,7 @@ import {
   ImageIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
+import { ConfirmDeleteModal } from '@/components/admin/ConfirmDeleteModal';
 
 export default function AdminHeroBannersPage() {
   const [banners, setBanners] = React.useState<HeroBanner[]>([]);
@@ -198,16 +199,22 @@ export default function AdminHeroBannersPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this banner?')) return;
+  const [deleteTarget, setDeleteTarget] = React.useState<{ id: string; title: string } | null>(null);
+  const [isDeleting, setIsDeleting] = React.useState(false);
 
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+
+    setIsDeleting(true);
     const supabase = createClient();
-    const { error } = await supabase.from('hero_banners').delete().eq('id', id);
+    const { error } = await supabase.from('hero_banners').delete().eq('id', deleteTarget.id);
     if (!error) {
-      setBanners(banners.filter((b) => b.id !== id));
+      setBanners((prev) => prev.filter((b) => b.id !== deleteTarget.id));
+      setDeleteTarget(null);
     } else {
       alert('Error deleting banner: ' + error.message);
     }
+    setIsDeleting(false);
   };
 
   return (
@@ -317,7 +324,7 @@ export default function AdminHeroBannersPage() {
                   <span>Edit</span>
                 </button>
                 <button
-                  onClick={() => handleDelete(banner.id)}
+                  onClick={() => setDeleteTarget({ id: banner.id, title: banner.title || 'Hero Banner' })}
                   className="p-2 text-[#64748B] hover:text-rose-600 hover:bg-rose-50 rounded-lg border border-transparent hover:border-rose-200 transition-all cursor-pointer flex items-center gap-1.5 text-xs font-semibold"
                   title="Delete Banner"
                 >
@@ -654,6 +661,16 @@ export default function AdminHeroBannersPage() {
           </div>
         </form>
       </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmDeleteModal
+        isOpen={Boolean(deleteTarget)}
+        onClose={() => !isDeleting && setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+        itemType="hero banner"
+        itemName={deleteTarget?.title}
+        isDeleting={isDeleting}
+      />
     </div>
   );
 }

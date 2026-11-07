@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { Collection } from '@/types/store.types';
 import { Input } from '@/components/ui/Input';
@@ -9,7 +10,8 @@ import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { MediaUploader } from '@/components/admin/MediaUploader';
 import { slugify } from '@/lib/utils/formatters';
-import { Plus, Edit2, Trash2, CheckCircle2, XCircle, Star, Loader2, AlertCircle, FolderKanban } from 'lucide-react';
+import { Plus, Edit2, Trash2, CheckCircle2, XCircle, Star, Loader2, AlertCircle, FolderKanban, Eye } from 'lucide-react';
+import { ConfirmDeleteModal } from '@/components/admin/ConfirmDeleteModal';
 
 export default function AdminCollectionsPage() {
   const [collections, setCollections] = React.useState<Collection[]>([]);
@@ -120,15 +122,21 @@ export default function AdminCollectionsPage() {
     }
   };
 
-  const handleDelete = async (id: string, name: string) => {
-    if (!window.confirm(`Delete collection "${name}"?`)) return;
+  const [deleteTarget, setDeleteTarget] = React.useState<{ id: string; name: string } | null>(null);
+  const [isDeleting, setIsDeleting] = React.useState(false);
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
     const supabase = createClient();
-    const { error } = await supabase.from('collections').delete().eq('id', id);
+    const { error } = await supabase.from('collections').delete().eq('id', deleteTarget.id);
     if (!error) {
-      setCollections(collections.filter((c) => c.id !== id));
+      setCollections((prev) => prev.filter((c) => c.id !== deleteTarget.id));
+      setDeleteTarget(null);
     } else {
       alert('Error: ' + error.message);
     }
+    setIsDeleting(false);
   };
 
   return (
@@ -234,17 +242,25 @@ export default function AdminCollectionsPage() {
                     </td>
 
                     <td className="px-4 py-3.5 text-right">
-                      <div className="inline-flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                      <div className="inline-flex items-center gap-1.5">
+                        <Link
+                          href={`/collections/${col.slug}`}
+                          target="_blank"
+                          className="p-1.5 rounded-lg text-[#475569] hover:text-[#0284C7] bg-[#F8FAFC] hover:bg-[#E0F2FE] border border-[#E2E8F0] hover:border-[#BAE6FD] transition-all shadow-2xs"
+                          title="View on store"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                        </Link>
                         <button
                           onClick={() => openEditModal(col)}
-                          className="p-1.5 rounded-lg text-[#94A3B8] hover:text-[#0284C7] hover:bg-[#EFF6FF] transition-colors cursor-pointer"
+                          className="p-1.5 rounded-lg text-[#475569] hover:text-[#0284C7] bg-[#F8FAFC] hover:bg-[#E0F2FE] border border-[#E2E8F0] hover:border-[#BAE6FD] transition-all shadow-2xs cursor-pointer"
                           title="Edit"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
                         <button
-                          onClick={() => handleDelete(col.id, col.name)}
-                          className="p-1.5 rounded-lg text-[#94A3B8] hover:text-rose-500 hover:bg-rose-50 transition-colors cursor-pointer"
+                          onClick={() => setDeleteTarget({ id: col.id, name: col.name })}
+                          className="p-1.5 rounded-lg text-[#475569] hover:text-rose-600 bg-[#F8FAFC] hover:bg-rose-50 border border-[#E2E8F0] hover:border-rose-200 transition-all shadow-2xs cursor-pointer"
                           title="Delete"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -401,6 +417,16 @@ export default function AdminCollectionsPage() {
           </div>
         </form>
       </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmDeleteModal
+        isOpen={Boolean(deleteTarget)}
+        onClose={() => !isDeleting && setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+        itemType="collection"
+        itemName={deleteTarget?.name}
+        isDeleting={isDeleting}
+      />
     </div>
   );
 }

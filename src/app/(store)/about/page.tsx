@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
-  Sparkles,
+  Feather,
   Award,
   Heart,
   Gem,
@@ -26,7 +26,7 @@ const PHILOSOPHY_POINTS = [
     desc: 'We value the individuality of every handloom saree. The subtle variations in texture, weave, colour, and finish are part of what makes each piece special.',
   },
   {
-    icon: Sparkles,
+    icon: Feather,
     title: 'Crafted with Purpose',
     desc: 'We believe beautiful clothing should also carry meaning. Our collections honour traditional weaving techniques while embracing the evolving style of today’s woman.',
   },
@@ -232,7 +232,7 @@ export default function AboutPage() {
                 <span className="text-xs sm:text-sm font-medium text-[#0F172A]">You are choosing heritage.</span>
               </div>
               <div className="flex items-center gap-2.5 p-3 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0]">
-                <Sparkles className="w-4 h-4 text-[#0284C7] shrink-0" />
+                <Feather className="w-4 h-4 text-[#0284C7] shrink-0" />
                 <span className="text-xs sm:text-sm font-medium text-[#0F172A]">Your own expression of elegance.</span>
               </div>
             </div>

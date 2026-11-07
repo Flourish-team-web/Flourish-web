@@ -6,13 +6,11 @@ import { Modal } from '@/components/ui/Modal';
 import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
 import {
   CheckCircle2,
-  ShieldCheck,
   MapPin,
   Phone,
   User,
   Loader2,
   Package,
-  Truck,
 } from 'lucide-react';
 import { formatCurrencyINR } from '@/lib/utils/formatters';
 
@@ -128,7 +126,9 @@ export function EnquiryModal({ isOpen, onClose, product, quantity = 1 }: Enquiry
     }
   };
 
-  const primaryImage = product.images?.[0]?.image_url;
+  const primaryImage = product?.images?.[0]?.image_url;
+
+  if (!isOpen || !product) return null;
 
   return (
     <Modal
@@ -388,24 +388,6 @@ export function EnquiryModal({ isOpen, onClose, product, quantity = 1 }: Enquiry
                 </>
               )}
             </button>
-
-            {/* Trust Footer */}
-            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs text-[#64748B]">
-              <span className="flex items-center gap-1.5 font-medium">
-                <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                Verified Handloom
-              </span>
-              <span className="text-[#CBD5E1] hidden sm:inline">•</span>
-              <span className="flex items-center gap-1.5 font-medium">
-                <Truck className="w-4 h-4 text-[#0284C7] shrink-0" />
-                Insured Dispatch
-              </span>
-              <span className="text-[#CBD5E1] hidden sm:inline">•</span>
-              <span className="flex items-center gap-1.5 font-medium">
-                <Package className="w-4 h-4 text-[#0284C7] shrink-0" />
-                Custom Fitting & Saree Care
-              </span>
-            </div>
           </div>
         </form>
       )}

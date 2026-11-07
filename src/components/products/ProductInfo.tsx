@@ -62,7 +62,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
   };
 
   return (
-    <div className="flex flex-col space-y-5 max-w-xl">
+    <div className="flex flex-col space-y-3.5 sm:space-y-4 max-w-xl">
       {/* 1. Breadcrumb & Product Code */}
       <div className="flex items-center justify-between gap-2 text-xs text-[#64748B]">
         <div className="flex items-center gap-1.5 uppercase tracking-wider font-light text-[11px]">
@@ -83,12 +83,12 @@ export function ProductInfo({ product }: ProductInfoProps) {
       </div>
 
       {/* 2. Saree Title */}
-      <h1 className="font-serif text-2xl sm:text-3xl lg:text-[2rem] text-[#0F172A] tracking-tight font-normal leading-snug">
+      <h1 className="font-serif text-xl sm:text-2xl lg:text-[1.75rem] text-[#0F172A] tracking-tight font-normal leading-snug">
         {product.name}
       </h1>
 
       {/* 3. Price & Discount (Clean without Ready to Dispatch) */}
-      <div className="flex items-baseline gap-3 pb-3.5 border-b border-[#E2E8F0]">
+      <div className="flex items-baseline gap-3 pb-3 border-b border-[#E2E8F0]">
         <span className="font-sans text-2xl sm:text-3xl font-bold text-[#0F172A]">
           {formatCurrencyINR(product.price)}
         </span>
@@ -105,19 +105,19 @@ export function ProductInfo({ product }: ProductInfoProps) {
       </div>
 
       {/* 4. Attribute Tags */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-1.5 sm:gap-2">
         {product.fabric && (
-          <span className="px-3 py-1 rounded-lg text-xs font-medium bg-[#F8FAFC] text-[#334155] border border-[#E2E8F0]">
+          <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-[#F8FAFC] text-[#334155] border border-[#E2E8F0]">
             {product.fabric}
           </span>
         )}
         {product.saree_type && (
-          <span className="px-3 py-1 rounded-lg text-xs font-medium bg-[#F8FAFC] text-[#334155] border border-[#E2E8F0]">
+          <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-[#F8FAFC] text-[#334155] border border-[#E2E8F0]">
             {product.saree_type}
           </span>
         )}
         {product.color && (
-          <span className="px-3 py-1 rounded-lg text-xs font-medium bg-[#F8FAFC] text-[#334155] border border-[#E2E8F0]">
+          <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-[#F8FAFC] text-[#334155] border border-[#E2E8F0]">
             {product.color}
           </span>
         )}
@@ -125,32 +125,32 @@ export function ProductInfo({ product }: ProductInfoProps) {
 
       {/* 5. Short Summary */}
       {product.short_description && (
-        <p className="text-xs sm:text-sm text-[#475569] leading-relaxed font-light">
+        <p className="text-xs sm:text-[13px] text-[#475569] leading-relaxed font-light">
           {product.short_description}
         </p>
       )}
 
       {/* 6. Textile Specs Grid */}
       <div className="space-y-2">
-        <div className="grid grid-cols-2 gap-2.5 text-xs">
-          <div className="p-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl flex items-center gap-2.5">
-            <Ruler className="w-4 h-4 text-[#0284C7] shrink-0" />
-            <span className="text-[#334155] text-xs font-medium">{product.dimensions || '5.5m Saree Length'}</span>
+        <div className="grid grid-cols-2 gap-2 text-xs">
+          <div className="p-2.5 sm:p-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl flex items-center gap-2">
+            <Ruler className="w-3.5 h-3.5 text-[#0284C7] shrink-0" />
+            <span className="text-[#334155] text-xs font-medium truncate">{product.dimensions || '5.5m Saree Length'}</span>
           </div>
 
-          <div className="p-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl flex items-center gap-2.5">
-            <Scissors className="w-4 h-4 text-[#0284C7] shrink-0" />
-            <span className="text-[#334155] text-xs font-medium">{product.blouse_details || '0.8m Blouse Piece Included'}</span>
+          <div className="p-2.5 sm:p-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl flex items-center gap-2">
+            <Scissors className="w-3.5 h-3.5 text-[#0284C7] shrink-0" />
+            <span className="text-[#334155] text-xs font-medium truncate">{product.blouse_details || '0.8m Blouse Piece Included'}</span>
           </div>
 
-          <div className="p-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl flex items-center gap-2.5">
-            <Droplets className="w-4 h-4 text-[#0284C7] shrink-0" />
-            <span className="text-[#334155] text-xs font-medium">{product.wash_care || 'Dry Clean Only. Muslin Wrap'}</span>
+          <div className="p-2.5 sm:p-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl flex items-center gap-2">
+            <Droplets className="w-3.5 h-3.5 text-[#0284C7] shrink-0" />
+            <span className="text-[#334155] text-xs font-medium truncate">{product.wash_care || 'Dry Clean Only. Muslin Wrap'}</span>
           </div>
 
-          <div className="p-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl flex items-center gap-2.5">
-            <Truck className="w-4 h-4 text-[#0284C7] shrink-0" />
-            <span className="text-[#334155] text-xs font-medium">Free Insured Delivery</span>
+          <div className="p-2.5 sm:p-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl flex items-center gap-2">
+            <Truck className="w-3.5 h-3.5 text-[#0284C7] shrink-0" />
+            <span className="text-[#334155] text-xs font-medium truncate">Shipping Fee Extra</span>
           </div>
         </div>
       </div>

@@ -7,6 +7,7 @@ import { ProductWithDetails, Category } from '@/types/store.types';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { MediaUploader } from './MediaUploader';
+import { SmartAutoFillBox, AutoFillPayload } from './SmartAutoFillBox';
 import { slugify, calculateDiscountPercentage } from '@/lib/utils/formatters';
 import {
   ArrowLeft,
@@ -15,13 +16,11 @@ import {
   Check,
   Package,
   Image as ImageIcon,
-  Ruler,
   Eye,
   EyeOff,
   Tag,
   TrendingUp,
   Star,
-  FileText,
 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils/cn';
@@ -63,7 +62,9 @@ export function ProductForm({ initialProduct }: ProductFormProps) {
   );
 
   // Status & Badges
-  const [availability, setAvailability] = React.useState(initialProduct?.availability || 'in_stock');
+  const [availability, setAvailability] = React.useState<'in_stock' | 'out_of_stock' | 'made_to_order'>(
+    (initialProduct?.availability as any) || 'in_stock'
+  );
   const [isPublished, setIsPublished] = React.useState(initialProduct ? initialProduct.is_published : true);
   const [isFeatured, setIsFeatured] = React.useState(initialProduct ? initialProduct.is_featured : false);
   const [isNewArrival, setIsNewArrival] = React.useState(initialProduct ? initialProduct.is_new_arrival : true);
@@ -81,6 +82,30 @@ export function ProductForm({ initialProduct }: ProductFormProps) {
   const handleNameChange = (val: string) => {
     setName(val);
     setSlug(slugify(val));
+  };
+
+  const handleAutoFill = (data: AutoFillPayload) => {
+    if (data.name !== undefined) setName(data.name);
+    if (data.slug !== undefined) setSlug(data.slug);
+    if (data.sku !== undefined) setSku(data.sku);
+    if (data.price !== undefined) setPrice(data.price);
+    if (data.comparePrice !== undefined) setComparePrice(data.comparePrice);
+    if (data.categoryId !== undefined) setCategoryId(data.categoryId);
+    if (data.fabric !== undefined) setFabric(data.fabric);
+    if (data.sareeType !== undefined) setSareeType(data.sareeType);
+    if (data.color !== undefined) setColor(data.color);
+    if (data.occasion !== undefined) setOccasion(data.occasion);
+    if (data.dimensions !== undefined) setDimensions(data.dimensions);
+    if (data.blouseDetails !== undefined) setBlouseDetails(data.blouseDetails);
+    if (data.washCare !== undefined) setWashCare(data.washCare);
+    if (data.shortDescription !== undefined) setShortDescription(data.shortDescription);
+    if (data.description !== undefined) setDescription(data.description);
+    if (data.availability !== undefined) setAvailability(data.availability);
+    if (data.isPublished !== undefined) setIsPublished(data.isPublished);
+    if (data.isFeatured !== undefined) setIsFeatured(data.isFeatured);
+    if (data.isNewArrival !== undefined) setIsNewArrival(data.isNewArrival);
+    if (data.isBestseller !== undefined) setIsBestseller(data.isBestseller);
+    if (data.images && data.images.length > 0) setImages(data.images);
   };
 
   const discount = calculateDiscountPercentage(parseFloat(price) || 0, parseFloat(comparePrice) || null);
@@ -187,7 +212,7 @@ export function ProductForm({ initialProduct }: ProductFormProps) {
             <div className="flex items-center gap-2 mb-0.5">
               <Package className="w-3.5 h-3.5 text-[#0284C7]" />
               <span className="text-[10px] uppercase tracking-widest text-[#0284C7] font-bold">
-                {isEditing ? 'Edit Handloom Product' : 'Add New Handloom Product'}
+                {isEditing ? 'Edit Handloom Saree' : 'Add New Handloom Saree'}
               </span>
             </div>
             <h1 className="font-serif text-lg sm:text-xl text-[#0F172A] font-medium truncate max-w-md">
@@ -239,184 +264,19 @@ export function ProductForm({ initialProduct }: ProductFormProps) {
         </div>
       )}
 
-      {/* 1. Saree Information & Pricing */}
-      <div className="bg-white border border-[#E2E8F0] rounded-2xl p-5 sm:p-6 space-y-4 shadow-xs">
-        <div className="flex items-center gap-2 border-b border-[#F1F5F9] pb-3">
-          <Package className="w-4 h-4 text-[#0284C7]" />
-          <h2 className="font-serif text-base text-[#0F172A] font-medium">1. General Information & Pricing</h2>
-        </div>
+      {/* 1. Smart Copy-Paste Auto-Fill Box */}
+      <SmartAutoFillBox categories={categories} onAutoFill={handleAutoFill} />
 
-        {/* Saree Name */}
-        <Input
-          label="Saree Title / Product Name *"
-          required
-          value={name}
-          onChange={(e) => handleNameChange(e.target.value)}
-          placeholder="e.g. Royal Sapphire Korvai Kanchipuram Silk Saree"
-        />
-
-        {/* URL Slug & SKU */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#0F172A]">
-                URL Slug *
-              </label>
-              {name && (
-                <button
-                  type="button"
-                  onClick={() => setSlug(slugify(name))}
-                  className="text-[10px] text-[#0284C7] hover:underline font-semibold cursor-pointer"
-                >
-                  Auto-generate
-                </button>
-              )}
-            </div>
-            <Input
-              required
-              value={slug}
-              onChange={(e) => setSlug(slugify(e.target.value))}
-              placeholder="e.g. royal-sapphire-kanchipuram"
-            />
-          </div>
-
-          <Input
-            label="Product Code"
-            value={sku}
-            onChange={(e) => setSku(e.target.value)}
-            placeholder="e.g. FW-KAN-001"
-          />
-        </div>
-
-        {/* Pricing & Availability */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
-          <Input
-            label="Selling Price (₹) *"
-            type="number"
-            step="1"
-            required
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            placeholder="18500"
-          />
-
-          <Input
-            label="Original / Compare Price (₹)"
-            type="number"
-            step="1"
-            value={comparePrice}
-            onChange={(e) => setComparePrice(e.target.value)}
-            placeholder="24000"
-          />
-
-          <div className="space-y-1.5">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[#0F172A]">
-              Availability Status
-            </label>
-            <select
-              value={availability}
-              onChange={(e) => setAvailability(e.target.value as any)}
-              className="w-full bg-[#F8FAFC] border border-[#CBD5E1] rounded-xl px-3.5 py-2.5 text-xs text-[#0F172A] focus:border-[#0284C7] focus:bg-white focus:outline-none transition-all cursor-pointer font-medium"
-            >
-              <option value="in_stock">In Stock (Ready to Dispatch)</option>
-              <option value="made_to_order">Made to Order</option>
-              <option value="out_of_stock">Sold Out</option>
-            </select>
-          </div>
-        </div>
-
-        {discount && discount > 0 && (
-          <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 font-medium flex items-center gap-2">
-            <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>Automatic discount badge: <strong>{discount}% OFF</strong> will be shown on the product card.</span>
-          </div>
-        )}
-
-        {/* Category */}
-        <div className="space-y-1.5 pt-1">
-          <label className="block text-xs font-semibold uppercase tracking-wider text-[#0F172A]">
-            Weave Category
-          </label>
-          <select
-            value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-            className="w-full bg-[#F8FAFC] border border-[#CBD5E1] rounded-xl px-3.5 py-2.5 text-xs text-[#0F172A] focus:border-[#0284C7] focus:bg-white focus:outline-none transition-all cursor-pointer font-medium"
-          >
-            <option value="">— Select Category —</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {/* 2. Textile & Handloom Specifications */}
-      <div className="bg-white border border-[#E2E8F0] rounded-2xl p-5 sm:p-6 space-y-4 shadow-xs">
-        <div className="flex items-center gap-2 border-b border-[#F1F5F9] pb-3">
-          <Ruler className="w-4 h-4 text-[#0284C7]" />
-          <h2 className="font-serif text-base text-[#0F172A] font-medium">2. Textile & Craft Specifications</h2>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          <Input
-            label="Fabric / Fiber"
-            value={fabric}
-            onChange={(e) => setFabric(e.target.value)}
-            placeholder="e.g. Pure Mulberry Silk"
-          />
-
-          <Input
-            label="Weave Technique / Type"
-            value={sareeType}
-            onChange={(e) => setSareeType(e.target.value)}
-            placeholder="e.g. Korvai Interlocking Zari"
-          />
-
-          <Input
-            label="Color Palette"
-            value={color}
-            onChange={(e) => setColor(e.target.value)}
-            placeholder="e.g. Royal Blue & Pure Gold Zari"
-          />
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          <Input
-            label="Occasion"
-            value={occasion}
-            onChange={(e) => setOccasion(e.target.value)}
-            placeholder="e.g. Bridal, Wedding, Festive"
-          />
-
-          <Input
-            label="Saree Length / Dimensions"
-            value={dimensions}
-            onChange={(e) => setDimensions(e.target.value)}
-            placeholder="e.g. 5.5 Meters"
-          />
-
-          <Input
-            label="Blouse Details"
-            value={blouseDetails}
-            onChange={(e) => setBlouseDetails(e.target.value)}
-            placeholder="e.g. 0.8m Included"
-          />
-        </div>
-
-        <Input
-          label="Wash & Storage Care"
-          value={washCare}
-          onChange={(e) => setWashCare(e.target.value)}
-          placeholder="e.g. Dry Clean Only. Store in breathable muslin wrap."
-        />
-      </div>
-
-      {/* 3. Photography */}
+      {/* 2. Saree Photography (Separate Dedicated Image Uploading Section) */}
       <div className="bg-white border border-[#E2E8F0] rounded-2xl p-5 sm:p-6 space-y-3 shadow-xs">
         <div className="flex items-center justify-between border-b border-[#F1F5F9] pb-3">
           <div className="flex items-center gap-2">
-            <ImageIcon className="w-4 h-4 text-[#0284C7]" />
-            <h2 className="font-serif text-base text-[#0F172A] font-medium">3. Saree Photography (Max 5 Photos)</h2>
+            <div className="w-7 h-7 rounded-lg bg-[#E0F2FE] border border-[#BAE6FD] text-[#0284C7] flex items-center justify-center shrink-0">
+              <ImageIcon className="w-4 h-4 text-[#0284C7]" />
+            </div>
+            <div>
+              <h2 className="font-serif text-base text-[#0F172A] font-medium">Saree Photography (Max 5 Photos)</h2>
+            </div>
           </div>
           <span className={cn(
             'text-[11px] font-semibold px-2.5 py-1 rounded-xl border',
@@ -438,79 +298,247 @@ export function ProductForm({ initialProduct }: ProductFormProps) {
         />
       </div>
 
-      {/* 4. Description & Story */}
-      <div className="bg-white border border-[#E2E8F0] rounded-2xl p-5 sm:p-6 space-y-4 shadow-xs">
-        <div className="flex items-center gap-2 border-b border-[#F1F5F9] pb-3">
-          <FileText className="w-4 h-4 text-[#0284C7]" />
-          <h2 className="font-serif text-base text-[#0F172A] font-medium">4. Story & Descriptions</h2>
+      {/* 3. Single Unified Saree Details & Handloom Specifications Form */}
+      {/* Fields strictly mirror the format in "COPY BLANK FORMAT" */}
+      <div className="bg-white border border-[#E2E8F0] rounded-2xl p-5 sm:p-7 space-y-6 shadow-xs">
+        <div className="border-b border-[#F1F5F9] pb-3">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-[#E0F2FE] border border-[#BAE6FD] text-[#0284C7] flex items-center justify-center shrink-0">
+              <Package className="w-4 h-4 text-[#0284C7]" />
+            </div>
+            <div>
+              <h2 className="font-serif text-base text-[#0F172A] font-medium">Saree Details & Handloom Specifications</h2>
+              <p className="text-[11px] text-[#64748B]">
+                All product information in one continuous form matching the copy-paste template.
+              </p>
+            </div>
+          </div>
         </div>
 
-        <div className="space-y-1.5">
+        {/* 1. PRODUCT NAME */}
+        <Input
+          label="Product Name / Saree Title *"
+          required
+          value={name}
+          onChange={(e) => handleNameChange(e.target.value)}
+          placeholder="e.g. Flourish Royal Kanchipuram Pure Silk Saree"
+        />
+
+        {/* 2. PRODUCT SLUG & 3. SKU */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#0F172A]">
+                Product Slug *
+              </label>
+              {name && (
+                <button
+                  type="button"
+                  onClick={() => setSlug(slugify(name))}
+                  className="text-[10px] text-[#0284C7] hover:underline font-semibold cursor-pointer"
+                >
+                  Auto-generate
+                </button>
+              )}
+            </div>
+            <Input
+              required
+              value={slug}
+              onChange={(e) => setSlug(slugify(e.target.value))}
+              placeholder="e.g. flourish-royal-kanchipuram-pure-silk-saree"
+            />
+          </div>
+
+          <Input
+            label="SKU / Product Code"
+            value={sku}
+            onChange={(e) => setSku(e.target.value)}
+            placeholder="e.g. FW-KNC-001"
+          />
+        </div>
+
+        {/* 4. CATEGORY, 5. SELLING PRICE, 6. COMPARE PRICE, 7. AVAILABILITY */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="space-y-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-[#0F172A]">
+              Category
+            </label>
+            <select
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
+              className="w-full bg-[#F8FAFC] border border-[#CBD5E1] rounded-xl px-3.5 py-2.5 text-xs text-[#0F172A] focus:border-[#0284C7] focus:bg-white focus:outline-none transition-all cursor-pointer font-medium"
+            >
+              <option value="">— Select Category —</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <Input
+            label="Selling Price (₹) *"
+            type="number"
+            step="1"
+            required
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            placeholder="18500"
+          />
+
+          <Input
+            label="Compare Price (₹)"
+            type="number"
+            step="1"
+            value={comparePrice}
+            onChange={(e) => setComparePrice(e.target.value)}
+            placeholder="24000"
+          />
+
+          <div className="space-y-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-[#0F172A]">
+              Availability
+            </label>
+            <select
+              value={availability}
+              onChange={(e) => setAvailability(e.target.value as any)}
+              className="w-full bg-[#F8FAFC] border border-[#CBD5E1] rounded-xl px-3.5 py-2.5 text-xs text-[#0F172A] focus:border-[#0284C7] focus:bg-white focus:outline-none transition-all cursor-pointer font-medium"
+            >
+              <option value="in_stock">In Stock (Ready to Dispatch)</option>
+              <option value="made_to_order">Made to Order</option>
+              <option value="out_of_stock">Sold Out</option>
+            </select>
+          </div>
+        </div>
+
+        {discount && discount > 0 && (
+          <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 font-medium flex items-center gap-2">
+            <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>Automatic discount badge: <strong>{discount}% OFF</strong> will be shown on the storefront card.</span>
+          </div>
+        )}
+
+        {/* 8. FABRIC, 9. SAREE TYPE, 10. COLOR */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
+          <Input
+            label="Fabric / Fiber"
+            value={fabric}
+            onChange={(e) => setFabric(e.target.value)}
+            placeholder="e.g. Pure Mulberry Silk"
+          />
+
+          <Input
+            label="Saree Type / Weave"
+            value={sareeType}
+            onChange={(e) => setSareeType(e.target.value)}
+            placeholder="e.g. Traditional Korvai Handloom Zari"
+          />
+
+          <Input
+            label="Color"
+            value={color}
+            onChange={(e) => setColor(e.target.value)}
+            placeholder="e.g. Royal Blue & Pure Gold Zari"
+          />
+        </div>
+
+        {/* 11. OCCASION, 12. DIMENSIONS, 13. BLOUSE DETAILS */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <Input
+            label="Occasion"
+            value={occasion}
+            onChange={(e) => setOccasion(e.target.value)}
+            placeholder="e.g. Bridal, Wedding & Festive"
+          />
+
+          <Input
+            label="Dimensions / Length"
+            value={dimensions}
+            onChange={(e) => setDimensions(e.target.value)}
+            placeholder="e.g. 5.5 Meters Saree Length"
+          />
+
+          <Input
+            label="Blouse Details"
+            value={blouseDetails}
+            onChange={(e) => setBlouseDetails(e.target.value)}
+            placeholder="e.g. 0.8 Meter Running Blouse Piece Included"
+          />
+        </div>
+
+        {/* 14. WASH CARE */}
+        <Input
+          label="Wash Care"
+          value={washCare}
+          onChange={(e) => setWashCare(e.target.value)}
+          placeholder="e.g. Dry Clean Only. Store in Muslin Wrap"
+        />
+
+        {/* 15. SHORT DESCRIPTION */}
+        <div className="space-y-1.5 pt-1">
           <label className="block text-xs font-semibold uppercase tracking-wider text-[#0F172A]">
-            Short Summary
+            Short Description
           </label>
           <textarea
             rows={2}
             value={shortDescription}
             onChange={(e) => setShortDescription(e.target.value)}
             placeholder="Brief 1-2 line overview of the saree drape..."
-            className="w-full bg-[#F8FAFC] border border-[#CBD5E1] rounded-xl px-3.5 py-2.5 text-xs text-[#0F172A] focus:border-[#0284C7] focus:bg-white focus:outline-none transition-all resize-none"
+            className="w-full bg-[#F8FAFC] border border-[#CBD5E1] rounded-xl px-3.5 py-2.5 text-xs text-[#0F172A] focus:border-[#0284C7] focus:bg-white focus:outline-none transition-all resize-none font-medium"
           />
         </div>
 
+        {/* 16. PRODUCT DESCRIPTION */}
         <div className="space-y-1.5">
           <label className="block text-xs font-semibold uppercase tracking-wider text-[#0F172A]">
-            Full Craft Story & Weaver Details
+            Product Description
           </label>
           <textarea
             rows={4}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Detailed handloom story, artisan background, motif details, and styling inspiration..."
-            className="w-full bg-[#F8FAFC] border border-[#CBD5E1] rounded-xl px-3.5 py-2.5 text-xs text-[#0F172A] focus:border-[#0284C7] focus:bg-white focus:outline-none transition-all resize-none"
+            placeholder="Detailed handloom story, artisan craftsmanship, motif details, and styling inspiration..."
+            className="w-full bg-[#F8FAFC] border border-[#CBD5E1] rounded-xl px-3.5 py-2.5 text-xs text-[#0F172A] focus:border-[#0284C7] focus:bg-white focus:outline-none transition-all resize-none font-medium"
           />
         </div>
-      </div>
 
-      {/* 5. Badges & Storefront Highlights */}
-      <div className="bg-white border border-[#E2E8F0] rounded-2xl p-5 sm:p-6 space-y-3 shadow-xs">
-        <div className="flex items-center gap-2 border-b border-[#F1F5F9] pb-3">
-          <Tag className="w-4 h-4 text-[#0284C7]" />
-          <h2 className="font-serif text-base text-[#0F172A] font-medium">5. Storefront Badges & Visibility</h2>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 pt-1">
-          {[
-            { label: 'Published on Store', icon: Eye, state: isPublished, setState: setIsPublished, activeColor: 'text-emerald-600' },
-            { label: 'New Arrival Badge', icon: Tag, state: isNewArrival, setState: setIsNewArrival, activeColor: 'text-[#0284C7]' },
-            { label: 'Bestseller Badge', icon: TrendingUp, state: isBestseller, setState: setIsBestseller, activeColor: 'text-rose-500' },
-            { label: 'Featured Highlight', icon: Star, state: isFeatured, setState: setIsFeatured, activeColor: 'text-amber-500' },
-          ].map(({ label, icon: Icon, state, setState, activeColor }) => (
-            <label
-              key={label}
-              className={cn(
-                'flex items-center gap-3 text-xs p-3 rounded-xl border transition-all cursor-pointer select-none',
-                state
-                  ? 'bg-[#F0F9FF] border-[#0284C7]/40 text-[#0F172A] font-semibold shadow-xs'
-                  : 'bg-[#F8FAFC] border-[#E2E8F0] text-[#64748B] hover:border-[#CBD5E1]'
-              )}
-            >
-              <div className={cn(
-                'w-4 h-4 rounded border flex items-center justify-center transition-all',
-                state ? 'bg-[#0284C7] border-[#0284C7]' : 'bg-white border-[#CBD5E1]'
-              )}>
-                {state && <Check className="w-3 h-3 text-white stroke-[2.5]" />}
-              </div>
-              <input
-                type="checkbox"
-                checked={state}
-                onChange={(e) => setState(e.target.checked)}
-                className="sr-only"
-              />
-              <Icon className={cn('w-4 h-4 shrink-0', state ? activeColor : 'text-[#94A3B8]')} />
-              <span>{label}</span>
-            </label>
-          ))}
+        {/* 17. PUBLISHED, 18. NEW ARRIVAL, 19. BESTSELLER, 20. FEATURED */}
+        <div className="pt-2 border-t border-[#F1F5F9]">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-[#0F172A] mb-3">
+            Storefront Badges & Visibility
+          </label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+            {[
+              { label: 'Published (Live)', icon: Eye, state: isPublished, setState: setIsPublished, activeColor: 'text-emerald-600' },
+              { label: 'New Arrival', icon: Tag, state: isNewArrival, setState: setIsNewArrival, activeColor: 'text-[#0284C7]' },
+              { label: 'Bestseller', icon: TrendingUp, state: isBestseller, setState: setIsBestseller, activeColor: 'text-rose-500' },
+              { label: 'Featured', icon: Star, state: isFeatured, setState: setIsFeatured, activeColor: 'text-amber-500' },
+            ].map(({ label, icon: Icon, state, setState, activeColor }) => (
+              <label
+                key={label}
+                className={cn(
+                  'flex items-center gap-3 text-xs p-3 rounded-xl border transition-all cursor-pointer select-none',
+                  state
+                    ? 'bg-[#F0F9FF] border-[#0284C7]/40 text-[#0F172A] font-semibold shadow-xs'
+                    : 'bg-[#F8FAFC] border-[#E2E8F0] text-[#64748B] hover:border-[#CBD5E1]'
+                )}
+              >
+                <div className={cn(
+                  'w-4 h-4 rounded border flex items-center justify-center transition-all',
+                  state ? 'bg-[#0284C7] border-[#0284C7]' : 'bg-white border-[#CBD5E1]'
+                )}>
+                  {state && <Check className="w-3 h-3 text-white stroke-[2.5]" />}
+                </div>
+                <input
+                  type="checkbox"
+                  checked={state}
+                  onChange={(e) => setState(e.target.checked)}
+                  className="sr-only"
+                />
+                <Icon className={cn('w-4 h-4 shrink-0', state ? activeColor : 'text-[#94A3B8]')} />
+                <span>{label}</span>
+              </label>
+            ))}
+          </div>
         </div>
       </div>
 
