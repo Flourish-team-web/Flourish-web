@@ -91,6 +91,10 @@ export default function AdminSettingsPage() {
 
       if (error) throw error;
 
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('site_settings_updated'));
+      }
+
       setSuccessMessage('Site settings successfully updated.');
       setTimeout(() => setSuccessMessage(null), 4000);
     } catch (err: any) {
