@@ -22,10 +22,14 @@ import {
   TrendingUp,
   Star,
   CopyX,
+  Shirt,
+  Banknote,
 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils/cn';
 import { AdminToast, ToastProps } from '@/components/admin/AdminToast';
+import { STANDARD_SIZES, parseProductSizes, formatSizesToDimensions } from '@/lib/utils/productSizes';
+import { isProductCodAvailable, formatMetaDescriptionWithCod } from '@/lib/utils/productCod';
 
 interface ProductFormProps {
   initialProduct?: ProductWithDetails | null;
@@ -51,12 +55,23 @@ export function ProductForm({ initialProduct }: ProductFormProps) {
   const [comparePrice, setComparePrice] = React.useState(initialProduct?.compare_price?.toString() || '');
   const [categoryId, setCategoryId] = React.useState(initialProduct?.category_id || '');
 
-  // Textile Specs
+  // Textile Specs & Apparel Sizing
+  const initialParsedSizes = React.useMemo(() => parseProductSizes(initialProduct?.dimensions), [initialProduct?.dimensions]);
+  const initialHasSizes = initialParsedSizes.length > 0;
+  const [hasSizes, setHasSizes] = React.useState(initialHasSizes);
+  const [selectedSizes, setSelectedSizes] = React.useState<string[]>(
+    initialHasSizes ? initialParsedSizes : ['S', 'M', 'L', 'XL', 'XXL']
+  );
+  const [customSizeInput, setCustomSizeInput] = React.useState('');
+
   const [fabric, setFabric] = React.useState(initialProduct?.fabric || '');
   const [sareeType, setSareeType] = React.useState(initialProduct?.saree_type || '');
   const [color, setColor] = React.useState(initialProduct?.color || '');
   const [occasion, setOccasion] = React.useState(initialProduct?.occasion || '');
-  const [dimensions, setDimensions] = React.useState(initialProduct?.dimensions || '5.5 Meters Saree Length');
+  // If product already had sizes, initialize saree dimensions state to default saree drape length
+  const [dimensions, setDimensions] = React.useState(
+    initialHasSizes ? '5.5 Meters Saree Length' : (initialProduct?.dimensions || '5.5 Meters Saree Length')
+  );
   const [blouseDetails, setBlouseDetails] = React.useState(initialProduct?.blouse_details || '0.8 Meter Running Blouse Piece Included');
   const [washCare, setWashCare] = React.useState(initialProduct?.wash_care || 'Dry Clean Only. Store in Muslin Wrap');
   
@@ -75,6 +90,8 @@ export function ProductForm({ initialProduct }: ProductFormProps) {
   const [isFeatured, setIsFeatured] = React.useState(initialProduct ? initialProduct.is_featured : false);
   const [isNewArrival, setIsNewArrival] = React.useState(initialProduct ? initialProduct.is_new_arrival : true);
   const [isBestseller, setIsBestseller] = React.useState(initialProduct ? initialProduct.is_bestseller : false);
+  // Cash on Delivery (COD) availability: Active by default (true), admin can deactivate (false)
+  const [isCodAvailable, setIsCodAvailable] = React.useState<boolean>(isProductCodAvailable(initialProduct));
 
   React.useEffect(() => {
     const fetchRelations = async () => {
@@ -91,6 +108,39 @@ export function ProductForm({ initialProduct }: ProductFormProps) {
     if (duplicateField === 'slug') setDuplicateField(null);
   };
 
+  const toggleSize = (size: string) => {
+    if (selectedSizes.includes(size)) {
+      setSelectedSizes(selectedSizes.filter((s) => s !== size));
+    } else {
+      setSelectedSizes([...selectedSizes, size]);
+    }
+  };
+
+  const addCustomSize = () => {
+    const trimmed = customSizeInput.trim().toUpperCase();
+    if (trimmed && !selectedSizes.includes(trimmed)) {
+      setSelectedSizes([...selectedSizes, trimmed]);
+      setCustomSizeInput('');
+    }
+  };
+
+  const handleToggleSizes = (enable: boolean) => {
+    setHasSizes(enable);
+    if (enable) {
+      if (selectedSizes.length === 0) {
+        setSelectedSizes(['S', 'M', 'L', 'XL', 'XXL']);
+      }
+    } else {
+      // Deactivating sizes: reset dimensions and blouse details to standard saree drape specifications
+      if (!dimensions || parseProductSizes(dimensions).length > 0) {
+        setDimensions('5.5 Meters Saree Length');
+      }
+      if (!blouseDetails || blouseDetails.toLowerCase().includes('lining')) {
+        setBlouseDetails('0.8 Meter Running Blouse Piece Included');
+      }
+    }
+  };
+
   const handleAutoFill = (data: AutoFillPayload) => {
     setErrorMessage(null);
     setToast(null);
@@ -105,7 +155,16 @@ export function ProductForm({ initialProduct }: ProductFormProps) {
     if (data.sareeType !== undefined) setSareeType(data.sareeType);
     if (data.color !== undefined) setColor(data.color);
     if (data.occasion !== undefined) setOccasion(data.occasion);
-    if (data.dimensions !== undefined) setDimensions(data.dimensions);
+    if (data.dimensions !== undefined) {
+      const parsed = parseProductSizes(data.dimensions);
+      if (parsed.length > 0) {
+        setHasSizes(true);
+        setSelectedSizes(parsed);
+      } else {
+        setHasSizes(false);
+        setDimensions(data.dimensions);
+      }
+    }
     if (data.blouseDetails !== undefined) setBlouseDetails(data.blouseDetails);
     if (data.washCare !== undefined) setWashCare(data.washCare);
     if (data.shortDescription !== undefined) setShortDescription(data.shortDescription);
@@ -115,6 +174,7 @@ export function ProductForm({ initialProduct }: ProductFormProps) {
     if (data.isFeatured !== undefined) setIsFeatured(data.isFeatured);
     if (data.isNewArrival !== undefined) setIsNewArrival(data.isNewArrival);
     if (data.isBestseller !== undefined) setIsBestseller(data.isBestseller);
+    if (data.isCodAvailable !== undefined) setIsCodAvailable(data.isCodAvailable);
     if (data.images && data.images.length > 0) setImages(data.images);
   };
 
@@ -139,14 +199,32 @@ export function ProductForm({ initialProduct }: ProductFormProps) {
       return;
     }
 
+    if (hasSizes && selectedSizes.length === 0) {
+      setErrorMessage('Please choose at least one available size (e.g. S, M, L, XL, XXL) or disable size options.');
+      return;
+    }
+
     setErrorMessage(null);
     setToast(null);
     setDuplicateField(null);
     setIsSubmitting(true);
     const supabase = createClient();
 
+    let finalDimensions: string | null = null;
+    if (hasSizes) {
+      finalDimensions = formatSizesToDimensions(selectedSizes);
+    } else {
+      const rawDim = dimensions.trim();
+      // When sizes are deactivated, guarantee dimensions reverts to clean saree specs and does not retain "Sizes: ..."
+      if (!rawDim || parseProductSizes(rawDim).length > 0) {
+        finalDimensions = '5.5 Meters Saree Length';
+      } else {
+        finalDimensions = rawDim;
+      }
+    }
+
     try {
-      const productPayload = {
+      const basePayload: any = {
         name: name.trim(),
         slug: slugify(slug),
         sku: sku.trim() || null,
@@ -159,7 +237,7 @@ export function ProductForm({ initialProduct }: ProductFormProps) {
         color: color.trim() || null,
         occasion: occasion.trim() || null,
         blouse_details: blouseDetails.trim() || null,
-        dimensions: dimensions.trim() || null,
+        dimensions: finalDimensions,
         wash_care: washCare.trim() || null,
         short_description: shortDescription.trim() || null,
         description: description.trim() || null,
@@ -168,22 +246,52 @@ export function ProductForm({ initialProduct }: ProductFormProps) {
         is_featured: isFeatured,
         is_new_arrival: isNewArrival,
         is_bestseller: isBestseller,
+        meta_description: formatMetaDescriptionWithCod(initialProduct?.meta_description, isCodAvailable),
+      };
+
+      const productPayload: any = {
+        ...basePayload,
+        is_cod_available: isCodAvailable,
       };
 
       let productId = initialProduct?.id;
 
       if (isEditing && productId) {
-        const { error: updateError } = await (supabase.from('products') as any)
+        let { error: updateError } = await (supabase.from('products') as any)
           .update(productPayload)
           .eq('id', productId);
+
+        // Fallback: If remote database doesn't have is_cod_available column yet, retry with basePayload
+        if (updateError) {
+          const errStr = String(updateError.message || '').toLowerCase();
+          if (errStr.includes('is_cod_available') || (errStr.includes('column') && errStr.includes('schema cache'))) {
+            const retryRes = await (supabase.from('products') as any)
+              .update(basePayload)
+              .eq('id', productId);
+            updateError = retryRes.error;
+          }
+        }
 
         if (updateError) throw updateError;
         await supabase.from('product_images').delete().eq('product_id', productId);
       } else {
-        const { data: newProd, error: insertError } = await (supabase.from('products') as any)
+        let { data: newProd, error: insertError } = await (supabase.from('products') as any)
           .insert(productPayload)
           .select('id')
           .single();
+
+        // Fallback: If remote database doesn't have is_cod_available column yet, retry with basePayload
+        if (insertError) {
+          const errStr = String(insertError.message || '').toLowerCase();
+          if (errStr.includes('is_cod_available') || (errStr.includes('column') && errStr.includes('schema cache'))) {
+            const retryRes = await (supabase.from('products') as any)
+              .insert(basePayload)
+              .select('id')
+              .single();
+            insertError = retryRes.error;
+            newProd = retryRes.data;
+          }
+        }
 
         if (insertError) throw insertError;
         productId = newProd.id;
@@ -558,27 +666,199 @@ export function ProductForm({ initialProduct }: ProductFormProps) {
           />
         </div>
 
-        {/* 11. OCCASION, 12. DIMENSIONS, 13. BLOUSE DETAILS */}
+        {/* APPAREL SIZING & VARIETY OPTIONS (Active toggle for Kurtis, Gowns & Variety Dresses) */}
+        <div className={cn(
+          "p-4 sm:p-5 rounded-2xl border transition-all space-y-4",
+          hasSizes
+            ? "bg-[#F0F9FF]/90 border-[#38BDF8]/60 shadow-xs"
+            : "bg-[#F8FAFC] border-[#E2E8F0]"
+        )}>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <div className={cn(
+                "w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border transition-colors mt-0.5",
+                hasSizes ? "bg-[#0284C7] text-white border-[#0284C7]" : "bg-white text-[#64748B] border-[#CBD5E1]"
+              )}>
+                <Shirt className="w-4 h-4" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-semibold text-[#0F172A]">
+                    Dress Sizing Options (Kurtis, Gowns, Salwars & Dresses)
+                  </h3>
+                  {hasSizes && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                      Active on Storefront
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-[#64748B] mt-0.5">
+                  {hasSizes
+                    ? 'Size Selection Card is ACTIVE. Customers can choose their size (S, M, L, XL, XXL) on the product page.'
+                    : 'Currently using standard Saree specifications (5.5m length & blouse piece). Turn ON for variety dresses requiring sizes.'}
+                </p>
+              </div>
+            </div>
+
+            {/* Toggle Switch */}
+            <label className="relative inline-flex items-center cursor-pointer shrink-0 self-start sm:self-center">
+              <input
+                type="checkbox"
+                checked={hasSizes}
+                onChange={(e) => handleToggleSizes(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-[#CBD5E1] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#CBD5E1] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0284C7]"></div>
+              <span className="ml-2.5 text-xs font-bold text-[#0F172A] select-none">
+                {hasSizes ? 'Sizes Active' : 'Enable Sizes'}
+              </span>
+            </label>
+          </div>
+
+          {/* When Enabled: Size Selection Pills & Controls */}
+          {hasSizes && (
+            <div className="pt-3 border-t border-[#BAE6FD]/60 space-y-3 animate-in fade-in">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#0F172A]">
+                  Select Available Sizes for this Dress *
+                </label>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedSizes(['S', 'M', 'L', 'XL', 'XXL'])}
+                    className="text-[10px] font-semibold text-[#0284C7] hover:underline cursor-pointer"
+                  >
+                    Select S–XXL
+                  </button>
+                  <span className="text-[#CBD5E1]">•</span>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedSizes([...STANDARD_SIZES])}
+                    className="text-[10px] font-semibold text-[#0284C7] hover:underline cursor-pointer"
+                  >
+                    Select All
+                  </button>
+                  <span className="text-[#CBD5E1]">•</span>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedSizes([])}
+                    className="text-[10px] font-semibold text-rose-600 hover:underline cursor-pointer"
+                  >
+                    Clear All
+                  </button>
+                </div>
+              </div>
+
+              {/* Standard Size Buttons */}
+              <div className="flex flex-wrap gap-2">
+                {STANDARD_SIZES.map((size) => {
+                  const isSelected = selectedSizes.includes(size);
+                  return (
+                    <button
+                      key={size}
+                      type="button"
+                      onClick={() => toggleSize(size)}
+                      className={cn(
+                        "h-10 px-3.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border select-none",
+                        isSelected
+                          ? "bg-[#0F172A] text-white border-[#0F172A] shadow-sm scale-102"
+                          : "bg-white text-[#475569] border-[#CBD5E1] hover:border-[#0F172A] hover:bg-[#F8FAFC]"
+                      )}
+                    >
+                      {isSelected && <Check className="w-3.5 h-3.5 stroke-[2.5]" />}
+                      <span>{size}</span>
+                    </button>
+                  );
+                })}
+
+                {/* Custom Sizes Added */}
+                {selectedSizes
+                  .filter((s) => !STANDARD_SIZES.includes(s as any))
+                  .map((size) => (
+                    <button
+                      key={size}
+                      type="button"
+                      onClick={() => toggleSize(size)}
+                      className="h-10 px-3.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border bg-[#0284C7] text-white border-[#0284C7] shadow-sm select-none"
+                    >
+                      <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+                      <span>{size}</span>
+                    </button>
+                  ))}
+              </div>
+
+              {/* Add Custom Size Input */}
+              <div className="flex items-center gap-2 pt-1">
+                <input
+                  type="text"
+                  value={customSizeInput}
+                  onChange={(e) => setCustomSizeInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      addCustomSize();
+                    }
+                  }}
+                  placeholder="Add custom size (e.g. 36, 38, Petite)..."
+                  className="bg-white border border-[#CBD5E1] rounded-xl px-3 py-1.5 text-xs text-[#0F172A] placeholder-[#94A3B8] focus:border-[#0284C7] focus:outline-none w-64"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addCustomSize}
+                  className="text-xs h-8 px-3"
+                >
+                  Add Size
+                </Button>
+              </div>
+
+              {/* Preview Box */}
+              <div className="p-2.5 rounded-xl bg-white border border-[#BAE6FD] text-xs text-[#0F172A] flex flex-wrap items-center justify-between gap-2">
+                <span className="font-medium text-[#475569]">
+                  Product Detail Page Card: <strong className="text-[#0F172A]">{selectedSizes.length > 0 ? selectedSizes.join(' · ') : '(No sizes selected)'}</strong>
+                </span>
+                <span className="text-[11px] font-semibold text-[#0284C7]">
+                  {selectedSizes.length} {selectedSizes.length === 1 ? 'size' : 'sizes'} available
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 11. OCCASION, 12. DIMENSIONS/SIZING, 13. BLOUSE/LINING DETAILS */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Input
             label="Occasion"
             value={occasion}
             onChange={(e) => setOccasion(e.target.value)}
-            placeholder="e.g. Bridal, Wedding & Festive"
+            placeholder="e.g. Bridal, Festive & Evening Wear"
           />
 
-          <Input
-            label="Dimensions / Length"
-            value={dimensions}
-            onChange={(e) => setDimensions(e.target.value)}
-            placeholder="e.g. 5.5 Meters Saree Length"
-          />
+          {hasSizes ? (
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#0F172A]">
+                Dimensions / Sizing
+              </label>
+              <div className="w-full bg-[#F0F9FF] border border-[#BAE6FD] rounded-xl px-3.5 py-2.5 text-xs text-[#0284C7] font-semibold truncate flex items-center gap-1.5">
+                <Check className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">Sizes: {selectedSizes.join(', ') || 'None'}</span>
+              </div>
+            </div>
+          ) : (
+            <Input
+              label="Dimensions / Length"
+              value={parseProductSizes(dimensions).length > 0 ? '5.5 Meters Saree Length' : dimensions}
+              onChange={(e) => setDimensions(e.target.value)}
+              placeholder="e.g. 5.5 Meters Saree Length"
+            />
+          )}
 
           <Input
-            label="Blouse Details"
+            label={hasSizes ? "Lining / Stitching Details (Optional)" : "Blouse Details"}
             value={blouseDetails}
             onChange={(e) => setBlouseDetails(e.target.value)}
-            placeholder="e.g. 0.8 Meter Running Blouse Piece Included"
+            placeholder={hasSizes ? "e.g. Premium Cotton Lining Included" : "e.g. 0.8 Meter Running Blouse Piece Included"}
           />
         </div>
 
@@ -655,6 +935,61 @@ export function ProductForm({ initialProduct }: ProductFormProps) {
                 <span>{label}</span>
               </label>
             ))}
+          </div>
+        </div>
+
+        {/* 21. CASH ON DELIVERY (COD) AVAILABILITY */}
+        <div className="pt-3 border-t border-[#F1F5F9]">
+          <div className={cn(
+            "p-4 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3",
+            isCodAvailable
+              ? "bg-emerald-50/70 border-emerald-200 shadow-xs"
+              : "bg-[#F8FAFC] border-[#E2E8F0]"
+          )}>
+            <div className="flex items-start sm:items-center gap-3">
+              <div className={cn(
+                "w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border transition-colors",
+                isCodAvailable
+                  ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
+                  : "bg-white text-[#64748B] border-[#CBD5E1]"
+              )}>
+                <Banknote className="w-4 h-4" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h4 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">
+                    Cash on Delivery (COD) Available
+                  </h4>
+                  {isCodAvailable ? (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                      Active on Product Page
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#F1F5F9] text-[#64748B] border border-[#CBD5E1]">
+                      Deactivated (Hidden)
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-[#64748B] mt-0.5">
+                  {isCodAvailable
+                    ? 'Default is Active. "Cash on Delivery Available" badge is visible to customers on the product page.'
+                    : 'Deactivated. The COD badge is hidden from customers on the product detail page.'}
+                </p>
+              </div>
+            </div>
+
+            <label className="relative inline-flex items-center cursor-pointer shrink-0 self-end sm:self-center">
+              <input
+                type="checkbox"
+                checked={isCodAvailable}
+                onChange={(e) => setIsCodAvailable(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-[#CBD5E1] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#CBD5E1] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+              <span className="ml-2.5 text-xs font-bold text-[#0F172A] select-none">
+                {isCodAvailable ? 'COD Active' : 'COD Deactivated'}
+              </span>
+            </label>
           </div>
         </div>
       </div>

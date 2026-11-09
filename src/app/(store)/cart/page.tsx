@@ -77,7 +77,7 @@ export default function CartPage() {
               <div className="space-y-3">
                 {cartItems.map((item) => (
                   <div
-                    key={item.productId}
+                    key={`${item.productId}-${item.size || 'default'}`}
                     className="bg-white border border-[#E2E8F0] rounded-xl p-3 sm:p-4.5 flex gap-3 sm:gap-4.5 items-start shadow-xs hover:border-[#CBD5E1] transition-all"
                   >
                     {/* Thumbnail */}
@@ -97,11 +97,18 @@ export default function CartPage() {
                     {/* Content */}
                     <div className="flex-1 min-w-0 flex flex-col justify-between min-h-[105px] sm:min-h-[120px]">
                       <div>
-                        {item.fabric && (
-                          <span className="text-[10px] font-sans tracking-widest text-[#0284C7] uppercase font-semibold block">
-                            {item.fabric}
-                          </span>
-                        )}
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {item.fabric && (
+                            <span className="text-[10px] font-sans tracking-widest text-[#0284C7] uppercase font-semibold">
+                              {item.fabric}
+                            </span>
+                          )}
+                          {item.size && (
+                            <span className="text-[10px] font-bold text-[#0284C7] bg-[#E0F2FE] border border-[#BAE6FD] px-2 py-0.5 rounded">
+                              Size: {item.size}
+                            </span>
+                          )}
+                        </div>
                         <Link
                           href={`/products/${item.slug}`}
                           className="font-serif text-sm sm:text-base font-medium text-[#0F172A] hover:text-[#0284C7] line-clamp-1 transition-colors mt-0.5"
@@ -121,7 +128,7 @@ export default function CartPage() {
                         <div className="flex items-center gap-1.5 border border-[#CBD5E1] rounded-lg bg-[#F8FAFC] p-0.5">
                           <button
                             type="button"
-                            onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+                            onClick={() => updateQuantity(item.productId, item.quantity - 1, item.size)}
                             className="w-7 h-7 flex items-center justify-center text-[#64748B] hover:text-[#0F172A] hover:bg-white rounded transition-colors cursor-pointer"
                             aria-label="Decrease quantity"
                           >
@@ -132,7 +139,7 @@ export default function CartPage() {
                           </span>
                           <button
                             type="button"
-                            onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                            onClick={() => updateQuantity(item.productId, item.quantity + 1, item.size)}
                             className="w-7 h-7 flex items-center justify-center text-[#64748B] hover:text-[#0F172A] hover:bg-white rounded transition-colors cursor-pointer"
                             aria-label="Increase quantity"
                           >
@@ -155,7 +162,7 @@ export default function CartPage() {
 
                           <button
                             type="button"
-                            onClick={() => removeFromCart(item.productId)}
+                            onClick={() => removeFromCart(item.productId, item.size)}
                             className="p-1.5 text-[#94A3B8] hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
                             title="Remove item"
                             aria-label="Remove item"
