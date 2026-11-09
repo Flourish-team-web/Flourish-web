@@ -155,6 +155,7 @@ export interface Database {
           is_new_arrival: boolean;
           is_bestseller: boolean;
           is_published: boolean;
+          is_cod_available?: boolean;
           meta_title: string | null;
           meta_description: string | null;
           created_at: string;
@@ -183,6 +184,7 @@ export interface Database {
           is_new_arrival?: boolean;
           is_bestseller?: boolean;
           is_published?: boolean;
+          is_cod_available?: boolean;
           meta_title?: string | null;
           meta_description?: string | null;
           created_at?: string;
@@ -210,6 +212,7 @@ export interface Database {
           is_new_arrival?: boolean;
           is_bestseller?: boolean;
           is_published?: boolean;
+          is_cod_available?: boolean;
           meta_title?: string | null;
           meta_description?: string | null;
           updated_at?: string;

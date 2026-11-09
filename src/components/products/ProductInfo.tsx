@@ -13,9 +13,12 @@ import {
   Award,
   Plus,
   Minus,
+  Banknote,
 } from 'lucide-react';
 import { ProductWithDetails } from '@/types/store.types';
 import { formatCurrencyINR, calculateDiscountPercentage } from '@/lib/utils/formatters';
+import { parseProductSizes } from '@/lib/utils/productSizes';
+import { isProductCodAvailable } from '@/lib/utils/productCod';
 import { useCart } from '@/hooks/useCart';
 import { EnquiryModal } from '@/components/products/EnquiryModal';
 import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
@@ -31,6 +34,15 @@ export function ProductInfo({ product }: ProductInfoProps) {
   const [isAdded, setIsAdded] = React.useState(false);
   const [isEnquiryModalOpen, setIsEnquiryModalOpen] = React.useState(false);
 
+  // Available Sizes Detection (For Variety Dresses, Kurtis, Gowns)
+  const availableSizes = React.useMemo(() => parseProductSizes(product.dimensions), [product.dimensions]);
+  const hasSizes = availableSizes.length > 0;
+  const [selectedSize, setSelectedSize] = React.useState<string>(availableSizes[0] || '');
+  const [sizeError, setSizeError] = React.useState(false);
+
+  // Cash on Delivery Availability (Active by default, admin controllable)
+  const isCodAvailable = React.useMemo(() => isProductCodAvailable(product), [product]);
+
   const discount = calculateDiscountPercentage(product.price, product.compare_price);
   const primaryImage = product.images?.[0]?.image_url || '/images/placeholder-saree.svg';
 
@@ -41,10 +53,19 @@ export function ProductInfo({ product }: ProductInfoProps) {
   const decrementQuantity = () => setQuantity((prev) => Math.max(1, prev - 1));
 
   const handleWhatsAppOrder = () => {
+    if (hasSizes && !selectedSize) {
+      setSizeError(true);
+      return;
+    }
     setIsEnquiryModalOpen(true);
   };
 
   const handleAddToCart = () => {
+    if (hasSizes && !selectedSize) {
+      setSizeError(true);
+      return;
+    }
+
     addToCart({
       productId: product.id,
       slug: product.slug,
@@ -53,6 +74,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
       imageUrl: primaryImage,
       fabric: product.fabric,
       sku: product.sku,
+      size: hasSizes ? selectedSize : null,
     }, quantity);
 
     setIsAdded(true);
@@ -104,8 +126,14 @@ export function ProductInfo({ product }: ProductInfoProps) {
         )}
       </div>
 
-      {/* 4. Attribute Tags */}
-      <div className="flex flex-wrap gap-1.5 sm:gap-2">
+      {/* 4. Attribute Tags & Badges */}
+      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+        {isCodAvailable && (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
+            <Banknote className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            <span>COD Available</span>
+          </span>
+        )}
         {product.fabric && (
           <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-[#F8FAFC] text-[#334155] border border-[#E2E8F0]">
             {product.fabric}
@@ -130,22 +158,28 @@ export function ProductInfo({ product }: ProductInfoProps) {
         </p>
       )}
 
-      {/* 6. Textile Specs Grid */}
+      {/* 6. Textile / Apparel Specs Grid */}
       <div className="space-y-2">
         <div className="grid grid-cols-2 gap-2 text-xs">
           <div className="p-2.5 sm:p-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl flex items-center gap-2">
             <Ruler className="w-3.5 h-3.5 text-[#0284C7] shrink-0" />
-            <span className="text-[#334155] text-xs font-medium truncate">{product.dimensions || '5.5m Saree Length'}</span>
+            <span className="text-[#334155] text-xs font-medium truncate">
+              {hasSizes ? `Sizes: ${availableSizes.join(', ')}` : (product.dimensions || '5.5m Saree Length')}
+            </span>
           </div>
 
           <div className="p-2.5 sm:p-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl flex items-center gap-2">
             <Scissors className="w-3.5 h-3.5 text-[#0284C7] shrink-0" />
-            <span className="text-[#334155] text-xs font-medium truncate">{product.blouse_details || '0.8m Blouse Piece Included'}</span>
+            <span className="text-[#334155] text-xs font-medium truncate">
+              {product.blouse_details || (hasSizes ? 'Tailored Fit Included' : '0.8m Blouse Piece Included')}
+            </span>
           </div>
 
           <div className="p-2.5 sm:p-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl flex items-center gap-2">
             <Droplets className="w-3.5 h-3.5 text-[#0284C7] shrink-0" />
-            <span className="text-[#334155] text-xs font-medium truncate">{product.wash_care || 'Dry Clean Only. Muslin Wrap'}</span>
+            <span className="text-[#334155] text-xs font-medium truncate">
+              {product.wash_care || (hasSizes ? 'Dry Clean / Gentle Wash' : 'Dry Clean Only. Muslin Wrap')}
+            </span>
           </div>
 
           <div className="p-2.5 sm:p-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl flex items-center gap-2">
@@ -154,6 +188,61 @@ export function ProductInfo({ product }: ProductInfoProps) {
           </div>
         </div>
       </div>
+
+      {/* 6.5. Size Selection Card (Shown on Storefront when Size Option is Active) */}
+      {hasSizes && (
+        <div className={cn(
+          "p-3.5 sm:p-4 rounded-2xl border transition-all space-y-2.5 mt-2",
+          sizeError
+            ? "bg-rose-50/70 border-rose-300 ring-1 ring-rose-300"
+            : "bg-[#F8FAFC] border-[#E2E8F0]"
+        )}>
+          <div className="flex items-center justify-between text-xs">
+            <div className="flex items-center gap-2">
+              <span className="font-semibold uppercase tracking-wider text-[#0F172A] text-xs">
+                Select Size
+              </span>
+              {selectedSize && (
+                <span className="font-bold text-[#0284C7] bg-[#E0F2FE] border border-[#BAE6FD] px-2 py-0.5 rounded-md text-[11px]">
+                  Selected: {selectedSize}
+                </span>
+              )}
+            </div>
+            <span className="text-[11px] text-[#64748B] font-medium">Standard Fit</span>
+          </div>
+
+          {/* Size Pills */}
+          <div className="flex flex-wrap gap-2 pt-0.5">
+            {availableSizes.map((size) => {
+              const isSelected = selectedSize === size;
+              return (
+                <button
+                  key={size}
+                  type="button"
+                  onClick={() => {
+                    setSelectedSize(size);
+                    if (sizeError) setSizeError(false);
+                  }}
+                  className={cn(
+                    "min-w-[46px] h-[40px] px-3.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center cursor-pointer border select-none",
+                    isSelected
+                      ? "bg-[#0F172A] text-white border-[#0F172A] shadow-sm scale-102"
+                      : "bg-white text-[#334155] border-[#CBD5E1] hover:border-[#0F172A] hover:bg-[#F1F5F9]"
+                  )}
+                >
+                  {size}
+                </button>
+              );
+            })}
+          </div>
+
+          {sizeError && (
+            <p className="text-[11px] font-medium text-rose-600 animate-in fade-in">
+              Please choose a size before adding to bag or ordering.
+            </p>
+          )}
+        </div>
+      )}
 
       {/* 7. Action CTAs */}
       <div className="pt-2 space-y-3">
@@ -232,11 +321,17 @@ export function ProductInfo({ product }: ProductInfoProps) {
       )}
 
       {/* 9. Authentic Handloom Trust Footer */}
-      <div className="pt-3 border-t border-[#E2E8F0] flex items-center justify-between text-[11px] text-[#64748B] font-medium">
+      <div className="pt-3 border-t border-[#E2E8F0] flex items-center justify-between text-[11px] text-[#64748B] font-medium flex-wrap gap-2">
         <div className="flex items-center gap-1.5">
           <Award className="w-3.5 h-3.5 text-[#0284C7]" />
           <span>Authentic Pure Silk Mark</span>
         </div>
+        {isCodAvailable && (
+          <div className="flex items-center gap-1.5 text-emerald-700 font-semibold">
+            <Banknote className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Cash on Delivery</span>
+          </div>
+        )}
         <div className="flex items-center gap-1.5">
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
           <span>Direct Weaver Heritage</span>
@@ -249,6 +344,8 @@ export function ProductInfo({ product }: ProductInfoProps) {
         onClose={() => setIsEnquiryModalOpen(false)}
         product={product}
         quantity={quantity}
+        size={hasSizes ? selectedSize : null}
+        isCodAvailable={isCodAvailable}
       />
     </div>
   );

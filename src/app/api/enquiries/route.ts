@@ -95,6 +95,7 @@ export async function POST(request: NextRequest) {
       productId: string | null;
       productName: string;
       sku: string | null;
+      size: string | null;
       price: number | null;
       quantity: number;
       productUrl: string | null;
@@ -127,6 +128,7 @@ export async function POST(request: NextRequest) {
         productId: rawProductId,
         productName: itemName,
         sku: sanitizeText(rawItem.sku, 50) || null,
+        size: sanitizeText(rawItem.size, 30) || null,
         price: itemPrice,
         quantity: itemQuantity,
         productUrl: typeof rawItem.productUrl === 'string' ? sanitizeText(rawItem.productUrl, 300) : null,
@@ -172,6 +174,7 @@ export async function POST(request: NextRequest) {
 
         itemsBlock += `*${idx + 1}. ${item.productName}*\n`;
         if (item.sku) itemsBlock += `   • Code: #${item.sku}\n`;
+        if (item.size) itemsBlock += `   • Size: ${item.size}\n`;
         itemsBlock += `   • Qty: ${item.quantity} × ${formattedUnitPrice} = ${formattedItemTotal}\n`;
         if (item.productUrl) itemsBlock += `   • Link: ${item.productUrl}\n`;
         itemsBlock += `\n`;

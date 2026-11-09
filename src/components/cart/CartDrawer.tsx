@@ -100,7 +100,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             ) : (
               <div className="divide-y divide-[#F1F5F9] space-y-3">
                   {cartItems.map((item) => (
-                    <div key={item.productId} className="pt-3 first:pt-0 flex gap-3.5 items-center">
+                    <div key={`${item.productId}-${item.size || 'default'}`} className="pt-3 first:pt-0 flex gap-3.5 items-center">
                       <Link
                         href={`/products/${item.slug}`}
                         onClick={onClose}
@@ -124,7 +124,12 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                           {item.name}
                         </Link>
                         
-                        <div className="flex items-center gap-2 text-[11px] text-[#64748B] mt-0.5">
+                        <div className="flex items-center gap-2 text-[11px] text-[#64748B] mt-0.5 flex-wrap">
+                          {item.size && (
+                            <span className="font-bold text-[#0284C7] bg-[#E0F2FE] border border-[#BAE6FD] px-1.5 py-0.2 rounded text-[10px]">
+                              Size: {item.size}
+                            </span>
+                          )}
                           {item.fabric && <span>{item.fabric}</span>}
                           {item.sku && <span>• Code: {item.sku}</span>}
                         </div>
@@ -138,7 +143,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                           <div className="flex items-center gap-1 border border-[#CBD5E1] rounded-lg bg-[#F8FAFC] p-0.5">
                             <button
                               type="button"
-                              onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+                              onClick={() => updateQuantity(item.productId, item.quantity - 1, item.size)}
                               className="p-1 text-[#64748B] hover:text-[#0F172A] transition-colors cursor-pointer"
                               aria-label="Decrease quantity"
                             >
@@ -149,7 +154,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                             </span>
                             <button
                               type="button"
-                              onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                              onClick={() => updateQuantity(item.productId, item.quantity + 1, item.size)}
                               className="p-1 text-[#64748B] hover:text-[#0F172A] transition-colors cursor-pointer"
                               aria-label="Increase quantity"
                             >
@@ -159,7 +164,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
 
                           <button
                             type="button"
-                            onClick={() => removeFromCart(item.productId)}
+                            onClick={() => removeFromCart(item.productId, item.size)}
                             className="p-1 text-[#94A3B8] hover:text-rose-500 transition-colors cursor-pointer"
                             aria-label="Remove item"
                           >

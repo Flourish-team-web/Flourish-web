@@ -16,6 +16,7 @@ export interface ProductWithDetails extends Product {
   images: ProductImage[];
   category?: Category | null;
   collection?: Collection | null;
+  sizes?: string[] | null;
 }
 
 export interface ProductFilterParams {
@@ -64,6 +65,7 @@ export interface CartItem {
   imageUrl: string;
   fabric?: string | null;
   sku?: string | null;
+  size?: string | null;
   quantity: number;
   addedAt: string;
 }

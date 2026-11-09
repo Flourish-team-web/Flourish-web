@@ -84,6 +84,7 @@ export function CartCheckoutModal({
       productId: item.productId,
       productName: item.name,
       sku: item.sku || null,
+      size: item.size || null,
       price: item.price,
       quantity: item.quantity,
       productUrl: item.slug ? `${origin}/products/${item.slug}` : null,

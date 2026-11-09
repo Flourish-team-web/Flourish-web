@@ -18,6 +18,8 @@ interface EnquiryModalProps {
   isOpen: boolean;
   onClose: () => void;
   quantity?: number;
+  size?: string | null;
+  isCodAvailable?: boolean;
   product: {
     id: string;
     name: string;
@@ -29,7 +31,7 @@ interface EnquiryModalProps {
   };
 }
 
-export function EnquiryModal({ isOpen, onClose, product, quantity = 1 }: EnquiryModalProps) {
+export function EnquiryModal({ isOpen, onClose, product, quantity = 1, size, isCodAvailable = true }: EnquiryModalProps) {
   const selectedQuantity = Math.max(1, quantity);
   const [formData, setFormData] = React.useState({
     name: '',
@@ -100,6 +102,7 @@ export function EnquiryModal({ isOpen, onClose, product, quantity = 1 }: Enquiry
             productId: product.id,
             productName: product.name,
             sku: product.sku,
+            size: size || null,
             price: product.price,
             quantity: selectedQuantity,
             productUrl,
@@ -159,10 +162,20 @@ export function EnquiryModal({ isOpen, onClose, product, quantity = 1 }: Enquiry
             <h4 className="font-serif text-sm sm:text-base md:text-lg text-[#0F172A] font-medium line-clamp-1 leading-snug">
               {product.name}
             </h4>
-            <div className="flex items-center gap-2.5 mt-1.5 text-xs text-[#64748B]">
+            <div className="flex items-center gap-2.5 mt-1.5 text-xs text-[#64748B] flex-wrap">
               {product.sku && (
                 <span className="font-mono bg-[#E2E8F0] px-2 py-0.5 rounded text-[11px] font-medium text-[#334155]">
                   #{product.sku}
+                </span>
+              )}
+              {size && (
+                <span className="font-bold text-[#0284C7] bg-[#E0F2FE] border border-[#BAE6FD] px-2 py-0.5 rounded text-[11px]">
+                  Size: {size}
+                </span>
+              )}
+              {isCodAvailable && (
+                <span className="font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded text-[11px]">
+                  COD Available
                 </span>
               )}
               <span className="flex items-center gap-1 font-medium text-[#0F172A]">
