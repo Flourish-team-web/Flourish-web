@@ -26,6 +26,7 @@ export interface AutoFillPayload {
   isFeatured?: boolean;
   isNewArrival?: boolean;
   isBestseller?: boolean;
+  isCodAvailable?: boolean;
   images?: string[];
 }
 
@@ -173,7 +174,7 @@ const KEY_MATCHERS: KeyMatcher[] = [
   { field: 'sareeType', patterns: [/^SAREE\s*TYPE:?/i, /^WEAVE\s*TECHNIQUE:?/i, /^TYPE:?/i, /^WEAVE:?/i] },
   { field: 'color', patterns: [/^COLOR:?/i, /^COLOUR:?/i, /^COLOR\s*PALETTE:?/i, /^SHADE:?/i] },
   { field: 'occasion', patterns: [/^OCCASION:?/i, /^EVENT:?/i, /^SUITABLE\s*FOR:?/i] },
-  { field: 'dimensions', patterns: [/^DIMENSIONS:?/i, /^SAREE\s*LENGTH:?/i, /^LENGTH:?/i] },
+  { field: 'dimensions', patterns: [/^DIMENSIONS:?/i, /^SAREE\s*LENGTH:?/i, /^LENGTH:?/i, /^AVAILABLE\s*SIZES?:?/i, /^SIZES?:?/i] },
   { field: 'blouseDetails', patterns: [/^BLOUSE\s*DETAILS:?/i, /^BLOUSE:?/i, /^BLOUSE\s*PIECE:?/i] },
   { field: 'washCare', patterns: [/^WASH\s*CARE:?/i, /^WASH\s*&\s*STORAGE\s*CARE:?/i, /^CARE:?/i] },
   { field: 'shortDescription', patterns: [/^SHORT\s*DESCRIPTION:?/i, /^SHORT\s*SUMMARY:?/i, /^SUMMARY:?/i] },
@@ -182,6 +183,7 @@ const KEY_MATCHERS: KeyMatcher[] = [
   { field: 'isNewArrival', patterns: [/^NEW\s*ARRIVAL:?/i, /^IS\s*NEW\s*ARRIVAL:?/i] },
   { field: 'isBestseller', patterns: [/^BESTSELLER:?/i, /^IS\s*BESTSELLER:?/i] },
   { field: 'isFeatured', patterns: [/^FEATURED:?/i, /^IS\s*FEATURED:?/i] },
+  { field: 'isCodAvailable', patterns: [/^COD:?/i, /^CASH\s*ON\s*DELIVERY:?/i, /^IS\s*COD:?/i] },
   { field: 'images', patterns: [/^IMAGE\s*URLS?:?/i, /^IMAGES?:?/i, /^PHOTOS?:?/i] },
 ];
 
@@ -379,6 +381,11 @@ export function SmartAutoFillBox({ categories, onAutoFill }: SmartAutoFillBoxPro
 
     if (getValue('isFeatured') !== undefined) {
       payload.isFeatured = parseBool(getValue('isFeatured'));
+      fieldsCount++;
+    }
+
+    if (getValue('isCodAvailable') !== undefined) {
+      payload.isCodAvailable = parseBool(getValue('isCodAvailable'));
       fieldsCount++;
     }
 

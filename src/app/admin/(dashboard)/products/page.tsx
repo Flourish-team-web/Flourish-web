@@ -22,6 +22,8 @@ import {
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils/cn';
 import { ConfirmDeleteModal } from '@/components/admin/ConfirmDeleteModal';
+import { parseProductSizes } from '@/lib/utils/productSizes';
+import { isProductCodAvailable } from '@/lib/utils/productCod';
 
 export default function AdminProductsPage() {
   const [products, setProducts] = React.useState<ProductWithDetails[]>([]);
@@ -221,7 +223,7 @@ export default function AdminProductsPage() {
                             <p className="font-serif font-medium text-sm text-[#0F172A] truncate max-w-[160px]">
                               {p.name}
                             </p>
-                            <div className="flex items-center gap-2 text-[10px] text-[#94A3B8] mt-0.5">
+                            <div className="flex items-center gap-2 text-[10px] text-[#94A3B8] mt-0.5 flex-wrap">
                               {p.sku && <span className="font-mono">#{p.sku}</span>}
                               <span className="text-[#CBD5E1]">•</span>
                               <span>{p.images?.length || 0}/5 photos</span>
@@ -229,6 +231,22 @@ export default function AdminProductsPage() {
                                 <>
                                   <span className="text-[#CBD5E1]">•</span>
                                   <span className="text-[#0284C7] font-semibold">New</span>
+                                </>
+                              )}
+                              {parseProductSizes(p.dimensions).length > 0 && (
+                                <>
+                                  <span className="text-[#CBD5E1]">•</span>
+                                  <span className="text-emerald-700 font-semibold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                                    Sizes: {parseProductSizes(p.dimensions).join(', ')}
+                                  </span>
+                                </>
+                              )}
+                              {!isProductCodAvailable(p) && (
+                                <>
+                                  <span className="text-[#CBD5E1]">•</span>
+                                  <span className="text-[#64748B] font-semibold bg-[#F1F5F9] px-1.5 py-0.5 rounded border border-[#CBD5E1]">
+                                    No COD
+                                  </span>
                                 </>
                               )}
                             </div>
