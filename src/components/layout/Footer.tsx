@@ -150,11 +150,6 @@ export function Footer({ initialSettings }: FooterProps = {}) {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/return-policy" className="hover:text-white transition-colors block py-0.5">
-                    Return Policy
-                  </Link>
-                </li>
-                <li>
                   <Link href="/contact" className="hover:text-white transition-colors block py-0.5">
                     Contact Us
                   </Link>

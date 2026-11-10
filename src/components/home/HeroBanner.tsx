@@ -93,8 +93,8 @@ export function HeroBanner({ banners }: HeroBannerProps) {
         );
       })}
 
-      {/* Optional Title Overlay only for banners with explicit distinct titles */}
-      {current.title && current.title !== current.cta_text && current.title !== 'Hero Banner' && (
+      {/* Primary Hero Heading: renders visual H1 when valid custom title exists; renders accessible fallback H1 otherwise */}
+      {current.title && current.title !== current.cta_text && current.title !== 'Hero Banner' ? (
         <div className="relative z-20 h-full container mx-auto px-4 sm:px-6 lg:px-8 flex items-center pointer-events-none">
           <div className="max-w-xl space-y-4 animate-fadeInUp" key={currentIndex}>
             <p className="text-[10px] sm:text-xs font-sans font-medium tracking-[0.25em] uppercase text-white/90">
@@ -110,6 +110,8 @@ export function HeroBanner({ banners }: HeroBannerProps) {
             )}
           </div>
         </div>
+      ) : (
+        <h1 className="sr-only">Flourish Woman — Authentic Handwoven Indian Sarees</h1>
       )}
 
       {/* Right Bottom Placed Explore Collection CTA Button */}

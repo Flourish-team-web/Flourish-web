@@ -23,17 +23,43 @@ interface CategoryDetailPageProps {
   }>;
 }
 
-export async function generateMetadata({ params }: CategoryDetailPageProps): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: CategoryDetailPageProps): Promise<Metadata> {
   const { slug } = await params;
+  const resolvedSearchParams = await searchParams;
   const category = await getCategoryBySlug(slug);
 
   if (!category) {
-    return { title: 'Category Not Found — Flourish Woman' };
+    return { title: 'Category Not Found' };
   }
 
+  const categoryTitle = category.meta_title || `${category.name} Sarees`;
+  const categoryDescription =
+    category.meta_description ||
+    category.description ||
+    `Explore our handpicked collection of authentic ${category.name} sarees.`;
+
+  const pageNum = resolvedSearchParams.page ? parseInt(resolvedSearchParams.page, 10) : 1;
+  const canonicalPath = pageNum > 1 ? `/categories/${slug}?page=${pageNum}` : `/categories/${slug}`;
+
   return {
-    title: category.meta_title || `${category.name} Sarees — Flourish Woman`,
-    description: category.meta_description || category.description || `Explore our handpicked collection of authentic ${category.name} sarees.`,
+    title: categoryTitle,
+    description: categoryDescription,
+    alternates: {
+      canonical: canonicalPath,
+    },
+    openGraph: {
+      type: 'website',
+      locale: 'en_IN',
+      url: canonicalPath,
+      siteName: 'Flourish Woman',
+      title: categoryTitle,
+      description: categoryDescription,
+    },
+    twitter: {
+      card: 'summary',
+      title: categoryTitle,
+      description: categoryDescription,
+    },
   };
 }
 

@@ -4,7 +4,6 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
 import {
   Package,
   Layers,
-  FolderKanban,
   MessageSquare,
   Plus,
   ArrowUpRight,
@@ -50,14 +49,12 @@ export default async function AdminDashboardPage() {
   const [
     { count: productsCount },
     { count: categoriesCount },
-    { count: collectionsCount },
     { count: enquiriesCount },
     { data: recentEnquiriesData },
     { data: recentProductsData },
   ] = await Promise.all([
     supabase.from('products').select('*', { count: 'exact', head: true }),
     supabase.from('categories').select('*', { count: 'exact', head: true }),
-    supabase.from('collections').select('*', { count: 'exact', head: true }),
     supabase.from('enquiries').select('*', { count: 'exact', head: true }),
     supabase
       .from('enquiries')
@@ -109,16 +106,6 @@ export default async function AdminDashboardPage() {
       label: 'Manage Weaves',
       gradient: 'from-violet-500 to-purple-400',
       shadow: 'shadow-violet-500/20',
-    },
-    {
-      title: 'Collections',
-      subtitle: 'Curated edits',
-      count: collectionsCount ?? 0,
-      icon: FolderKanban,
-      href: '/admin/collections',
-      label: 'Manage Curations',
-      gradient: 'from-amber-500 to-orange-400',
-      shadow: 'shadow-amber-500/20',
     },
     {
       title: 'Enquiries',
@@ -198,7 +185,7 @@ export default async function AdminDashboardPage() {
             Admin Dashboard
           </h1>
           <p className="text-xs text-[#64748B] font-sans mt-0.5 max-w-lg">
-            Manage your boutique inventory, photography, curated collections, and customer leads from one unified panel.
+            Manage your boutique inventory, photography, and customer leads from one unified panel.
           </p>
         </div>
 
@@ -215,7 +202,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4">
         {statCards.map((card) => {
           const Icon = card.icon;
           return (

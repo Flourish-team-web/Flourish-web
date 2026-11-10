@@ -12,8 +12,24 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — Flourish Woman",
-  description: "Learn how Flourish Woman collects, protects, and respects your personal data. Transparent privacy practices for our valued patrons.",
+  title: 'Privacy Policy',
+  description: 'Learn how Flourish Woman collects, protects, and respects your personal data. Transparent privacy practices for our valued patrons.',
+  alternates: {
+    canonical: '/privacy-policy',
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_IN',
+    url: '/privacy-policy',
+    siteName: 'Flourish Woman',
+    title: 'Privacy Policy',
+    description: 'Learn how Flourish Woman collects, protects, and respects your personal data. Transparent privacy practices for our valued patrons.',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Privacy Policy',
+    description: 'Learn how Flourish Woman collects, protects, and respects your personal data. Transparent privacy practices for our valued patrons.',
+  },
 };
 
 export default function PrivacyPolicyPage() {
