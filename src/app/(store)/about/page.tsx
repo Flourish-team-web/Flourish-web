@@ -15,8 +15,24 @@ import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
 import { buildBespokeWhatsAppUrl } from '@/lib/whatsapp/urlBuilder';
 
 export const metadata: Metadata = {
-  title: "About Flourish Woman — Woven with Tradition. Designed for Today.",
+  title: 'About Us — Woven with Tradition. Designed for Today.',
   description: "Discover Flourish Woman: thoughtfully selected handloom sarees that celebrate India's rich weaving traditions with contemporary elegance.",
+  alternates: {
+    canonical: '/about',
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_IN',
+    url: '/about',
+    siteName: 'Flourish Woman',
+    title: 'About Us — Woven with Tradition. Designed for Today.',
+    description: "Discover Flourish Woman: thoughtfully selected handloom sarees that celebrate India's rich weaving traditions with contemporary elegance.",
+  },
+  twitter: {
+    card: 'summary',
+    title: 'About Us — Woven with Tradition. Designed for Today.',
+    description: "Discover Flourish Woman: thoughtfully selected handloom sarees that celebrate India's rich weaving traditions with contemporary elegance.",
+  },
 };
 
 const PHILOSOPHY_POINTS = [

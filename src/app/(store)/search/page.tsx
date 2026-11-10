@@ -6,8 +6,12 @@ import { SectionHeading } from '@/components/ui/SectionHeading';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Search Sarees & Weaves — Flourish Woman',
+  title: 'Search Sarees & Weaves',
   description: 'Search across our catalog of authentic handloom silk, banarasi, and designer sarees.',
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 interface SearchPageProps {

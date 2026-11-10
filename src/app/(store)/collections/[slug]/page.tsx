@@ -23,17 +23,43 @@ interface CollectionDetailPageProps {
   }>;
 }
 
-export async function generateMetadata({ params }: CollectionDetailPageProps): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: CollectionDetailPageProps): Promise<Metadata> {
   const { slug } = await params;
+  const resolvedSearchParams = await searchParams;
   const collection = await getCollectionBySlug(slug);
 
   if (!collection) {
-    return { title: 'Collection Not Found — Flourish Woman' };
+    return { title: 'Collection Not Found' };
   }
 
+  const collectionTitle = collection.meta_title || `${collection.name} Collection`;
+  const collectionDescription =
+    collection.meta_description ||
+    collection.description ||
+    `Explore the curated ${collection.name} saree edit.`;
+
+  const pageNum = resolvedSearchParams.page ? parseInt(resolvedSearchParams.page, 10) : 1;
+  const canonicalPath = pageNum > 1 ? `/collections/${slug}?page=${pageNum}` : `/collections/${slug}`;
+
   return {
-    title: collection.meta_title || `${collection.name} Collection — Flourish Woman`,
-    description: collection.meta_description || collection.description || `Explore the curated ${collection.name} saree edit.`,
+    title: collectionTitle,
+    description: collectionDescription,
+    alternates: {
+      canonical: canonicalPath,
+    },
+    openGraph: {
+      type: 'website',
+      locale: 'en_IN',
+      url: canonicalPath,
+      siteName: 'Flourish Woman',
+      title: collectionTitle,
+      description: collectionDescription,
+    },
+    twitter: {
+      card: 'summary',
+      title: collectionTitle,
+      description: collectionDescription,
+    },
   };
 }
 

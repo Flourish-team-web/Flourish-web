@@ -18,19 +18,35 @@ export async function generateMetadata({ params }: ProductDetailPageProps): Prom
 
   if (!product) {
     return {
-      title: 'Saree Not Found — Flourish Woman',
+      title: 'Saree Not Found',
     };
   }
 
-  const primaryImage = product.images?.[0]?.image_url;
+  const productTitle = product.meta_title || product.name;
+  const productDescription =
+    product.meta_description ||
+    product.short_description ||
+    `Exquisite handwoven ${product.name} crafted in pure ${product.fabric || 'silk'}.`;
+  const canonicalUrl = `/products/${slug}`;
 
   return {
-    title: product.meta_title || `${product.name} — Flourish Woman`,
-    description: product.meta_description || product.short_description || `Exquisite handwoven ${product.name} crafted in pure ${product.fabric || 'silk'}.`,
+    title: productTitle,
+    description: productDescription,
+    alternates: {
+      canonical: canonicalUrl,
+    },
     openGraph: {
-      title: product.name,
-      description: product.short_description || undefined,
-      images: primaryImage ? [{ url: primaryImage }] : undefined,
+      type: 'website',
+      locale: 'en_IN',
+      url: canonicalUrl,
+      siteName: 'Flourish Woman',
+      title: productTitle,
+      description: productDescription,
+    },
+    twitter: {
+      card: 'summary',
+      title: productTitle,
+      description: productDescription,
     },
   };
 }
