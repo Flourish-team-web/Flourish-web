@@ -21,14 +21,15 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://flourishwomens.com'),
   title: {
-    template: "%s | Flourish Women's",
-    default: "Flourish Women's — Wear Your Own Story",
+    template: '%s | Flourish Woman',
+    default: 'Flourish Woman — Wear Your Own Story',
   },
   description:
     'Discover authentic handwoven Indian sarees. Curated Kanchipuram, Banarasi, Soft Silk, and Organza creations crafted for life’s most cherished celebrations.',
   keywords: [
-    "Flourish Women's",
+    'Flourish Woman',
     'Flourish Sarees',
     'Kanchipuram Silk Saree',
     'Banarasi Saree',
@@ -36,9 +37,24 @@ export const metadata: Metadata = {
     'Handloom Sarees',
     'Pure Silk Saree',
   ],
-  authors: [{ name: "Flourish Women's" }],
+  authors: [{ name: 'Flourish Woman' }],
   icons: {
     icon: '/favicon.svg',
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_IN',
+    url: 'https://flourishwomens.com',
+    siteName: 'Flourish Woman',
+    title: 'Flourish Woman — Wear Your Own Story',
+    description:
+      'Discover authentic handwoven Indian sarees. Curated Kanchipuram, Banarasi, Soft Silk, and Organza creations crafted for life’s most cherished celebrations.',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Flourish Woman — Wear Your Own Story',
+    description:
+      'Discover authentic handwoven Indian sarees. Curated Kanchipuram, Banarasi, Soft Silk, and Organza creations crafted for life’s most cherished celebrations.',
   },
 };
 

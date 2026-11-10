@@ -6,11 +6,6 @@ import { ProductGrid } from '@/components/products/ProductGrid';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-export const metadata: Metadata = {
-  title: 'All Sarees — Handloom Heritage Collection — Flourish Woman',
-  description: 'Explore the complete Flourish Woman collection of authentic handloom silk, organza, and festive sarees.',
-};
-
 interface ProductsPageProps {
   searchParams: Promise<{
     sort?: 'newest' | 'price_asc' | 'price_desc' | 'popular' | 'featured';
@@ -24,6 +19,36 @@ interface ProductsPageProps {
     maxPrice?: string;
     page?: string;
   }>;
+}
+
+export async function generateMetadata({ searchParams }: ProductsPageProps): Promise<Metadata> {
+  const resolvedParams = await searchParams;
+  const pageNum = resolvedParams.page ? parseInt(resolvedParams.page, 10) : 1;
+  const canonicalPath = pageNum > 1 ? `/products?page=${pageNum}` : '/products';
+  const pageTitle = 'All Sarees — Handloom Heritage Collection';
+  const pageDescription =
+    'Explore the complete Flourish Woman collection of authentic handloom silk, organza, and festive sarees.';
+
+  return {
+    title: pageTitle,
+    description: pageDescription,
+    alternates: {
+      canonical: canonicalPath,
+    },
+    openGraph: {
+      type: 'website',
+      locale: 'en_IN',
+      url: canonicalPath,
+      siteName: 'Flourish Woman',
+      title: pageTitle,
+      description: pageDescription,
+    },
+    twitter: {
+      card: 'summary',
+      title: pageTitle,
+      description: pageDescription,
+    },
+  };
 }
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
